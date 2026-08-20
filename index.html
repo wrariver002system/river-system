@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>河川分署業務查詢系統</title>
 
-    <!-- Leaflet CSS -->
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
     <style>
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
             font-family: "Microsoft JhengHei", sans-serif;
             background: #f5f5f5;
+            color: #222;
         }
 
         .header {
@@ -32,67 +30,248 @@
             background: white;
         }
 
-        select {
+        .toolbar select {
             padding: 8px 12px;
             font-size: 16px;
         }
 
-.data-entry {
-    background: white;
-    margin: 20px;
-    padding: 20px;
-    border-radius: 8px;
-}
+        .page-tabs {
+            display: flex;
+            background: white;
+            padding: 0 20px;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #ddd;
+        }
 
-.data-entry h2 {
-    margin-top: 0;
-}
+        .tab-button {
+            border: none;
+            background: transparent;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            color: #666;
+            border-bottom: 3px solid transparent;
+        }
 
-.form-row {
-    margin-bottom: 15px;
-}
+        .tab-button:hover { background: #f5f5f5; }
 
-.form-row label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
+        .tab-button.active {
+            color: #1565c0;
+            font-weight: bold;
+            border-bottom-color: #1565c0;
+        }
 
-.form-row input,
-.form-row textarea {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 8px;
-    font-size: 16px;
-}
-
-.data-entry button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-#saveMessage {
-    margin-top: 12px;
-    font-weight: bold;
-}
+        .page { display: none; }
+        .page.active { display: block; }
 
         #map {
-            height: 500px;
+            height: calc(100vh - 165px);
+            min-height: 500px;
+        }
+
+        .content-card {
+            background: white;
+            max-width: 1280px;
+            margin: 24px auto;
+            padding: 28px;
+            border-radius: 8px;
+        }
+
+        .content-card h2 {
+            margin: 0 0 18px;
+        }
+
+        .form-section {
+            border: 1px solid #d9e2d0;
+            border-radius: 7px;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+
+        .form-section-title {
+            margin: 0;
+            padding: 10px 14px;
+            background: #EBF1DE;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            padding: 16px;
+        }
+
+        .form-grid.two-col {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .form-grid.one-col {
+            grid-template-columns: 1fr;
+        }
+
+        .form-field {
+            min-width: 0;
+        }
+
+        .form-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-field label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            line-height: 1.45;
+            white-space: pre-line;
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+        }
+
+        .form-field textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .readonly-input {
+            background: #f2f2f2 !important;
+        }
+
+        .button-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 18px;
+        }
+
+        .primary-button,
+        .secondary-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .primary-button {
+            border: 1px solid #1565c0;
+            background: #1565c0;
+            color: white;
+        }
+
+        .secondary-button {
+            border: 1px solid #aaa;
+            background: white;
+            color: #333;
+        }
+
+        #saveMessage {
+            font-weight: bold;
+        }
+
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        #dataStatus {
+            margin: 8px 0 14px;
+            color: #666;
+        }
+
+        .table-wrap {
+            overflow: auto;
+            max-height: calc(100vh - 300px);
+            border: 1px solid #aaa;
+        }
+
+        .business-table {
+            border-collapse: collapse;
+            min-width: 5000px;
+            background: white;
+            font-size: 14px;
+        }
+
+        .business-table th,
+        .business-table td {
+            border: 1px solid #777;
+            padding: 7px 8px;
+            vertical-align: middle;
+            white-space: pre-wrap;
+        }
+
+        .business-table thead th {
+            background: #EBF1DE;
+            font-weight: bold;
+            text-align: center;
+            position: sticky;
+            z-index: 2;
+        }
+
+        .business-table thead tr:first-child th {
+            top: 0;
+        }
+
+        .business-table thead tr:nth-child(2) th {
+            top: 55px;
+        }
+
+        .business-table tbody td {
+            min-width: 120px;
+        }
+
+        .business-table tbody td:nth-child(2),
+        .business-table tbody td:nth-child(8),
+        .business-table tbody td:nth-child(12),
+        .business-table tbody td:nth-child(20),
+        .business-table tbody td:nth-child(31){
+            min-width: 260px;
+        }
+
+        .empty-row {
+            text-align: center !important;
+            color: #777;
+            padding: 25px !important;
+        }
+
+        .helper-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 900px) {
+            .content-card { margin: 15px; padding: 18px; }
+            .form-grid,
+            .form-grid.two-col { grid-template-columns: 1fr; }
+            .page-tabs { padding: 0 5px; }
+            .tab-button { flex: 1; padding: 12px 5px; font-size: 14px; }
+            .data-header { align-items: flex-start; flex-direction: column; }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="header">
-        河川分署業務查詢系統
-    </div>
+    <div class="header">河川分署業務查詢系統</div>
 
     <div class="toolbar">
-
         <label for="division">河川分署：</label>
-
         <select id="division">
             <option value="">請選擇河川分署</option>
             <option value="1">第一河川分署</option>
@@ -106,227 +285,1273 @@
             <option value="9">第九河川分署</option>
             <option value="10">第十河川分署</option>
         </select>
-
     </div>
 
-    <div id="map"></div>
+    <div class="page-tabs">
+        <button type="button" class="tab-button active" data-page="mapPage">🗺 地圖查詢</button>
+        <button type="button" class="tab-button" data-page="dataEntryPage">✏️ 工程提報</button>
+        <button type="button" class="tab-button" data-page="businessDataPage">📋 提報內容</button>
+    </div>
 
-<div class="data-entry">
+    <div id="mapPage" class="page active">
+        <div id="map"></div>
+    </div>
 
-    <h2>業務資料登錄</h2>
+    <div id="businessDataPage" class="page">
+        <div class="content-card">
+            <div class="data-header">
+                <h2>附表1-「基礎設施防護-中央管河川整體改善」案件明細表</h2>
+                <button type="button" class="secondary-button" id="refreshDataButton">重新載入資料</button>
+            </div>
 
-    <form
-        id="businessForm"
-        action="https://script.google.com/macros/s/AKfycbzk4Ek12ShjL9wpQmU-d-eMhZAfVZ-g1JoGnCjgqoIsNmF6veB033Mt-GcyO_D94dPV/exec"
-        method="POST"
-        target="hiddenFrame"
+            <div id="dataStatus">尚未載入資料</div>
+
+            <div class="table-wrap">
+                <table class="business-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">項次</th>
+                            <th rowspan="2">類別<br>(用地先期、用地取得、委託測設監造、橋梁改建、工程)</th>
+                            <th rowspan="2">分署別</th>
+                            <th rowspan="2">縣市</th>
+                            <th rowspan="2">鄉鎮市</th>
+                            <th rowspan="2">水系</th>
+                            <th rowspan="2">溪別</th>
+                            <th rowspan="2">案件名稱</th>
+                            <th colspan="4">提報工程內容</th>
+                            <th colspan="4">預期工程效益</th>
+                            <th rowspan="2">是否辦理核定階段生態檢核<br>(是/否)</th>
+                            <th rowspan="2">河川小水力發電潛力案場初評結果(請填列分數)<br>分數≥4者，列為具潛力案例，可持續評估<br>分數&lt;4者，列為不具潛力案例第二階段免評</th>
+                            <th rowspan="2">座標點位<br>(TWD97，經緯度)</th>
+                            <th colspan="3">用地辦理情形</th>
+                            <th rowspan="2">預定開工日期<br>(年/月/日)</th>
+                            <th rowspan="2">預定完工日期<br>(年/月/日)</th>
+                            <th rowspan="2">預定工期<br>(月)</th>
+                            <th colspan="3">年度預估使用經費(千元)</th>
+                            <th rowspan="2">經費需求(千元)<br>(D=A+B+C)</th>
+                            <th rowspan="2">預估碳排量(tCO2e)</th>
+                            <th rowspan="2">備註(請填列關切人員或長官交辦紀錄等)</th>
+                        </tr>
+                        <tr>
+                            <th>建造物名稱</th>
+                            <th>堤防<br>(公尺)</th>
+                            <th>護岸<br>(公尺)</th>
+                            <th>其他<br>(請說明)</th>
+
+                            <th>保護面積<br>(公頃)</th>
+                            <th>保護人口數<br>(千人)</th>
+                            <th>生態友善及地景營造長度<br>(公尺)</th>
+                            <th>整體環境改善面積<br>(公頃)</th>
+
+                            <th>A：已完成用地先期作業，接續辦理用地取得<br>B：已取得用地，接續辦理之工程<br>C：辦理取得用地中，且接續辦理之工程<br>D：其他(請說明)</th>
+                            <th>預估用地取得經費(千元)<br>(僅類別屬用地先期需填列)</th>
+                            <th>用地案是否已送評定市價<br>(是/否)</th>
+
+                            <th>115年<br>(A)</th>
+                            <th>116年<br>(B)</th>
+                            <th>117年<br>(C)</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="businessDataBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="dataEntryPage" class="page">
+        <div class="content-card">
+
+            <h2>附表1-「基礎設施防護-中央管河川整體改善」案件資料登錄</h2>
+
+            <form id="businessForm" action="https://script.google.com/macros/s/AKfycbzk4Ek12ShjL9wpQmU-d-eMhZAfVZ-g1JoGnCjgqoIsNmF6veB033Mt-GcyO_D94dPV/exec" method="POST" target="hiddenFrame">
+
+                <section class="form-section">
+                    <h3 class="form-section-title">基本資料</h3>
+                    <div class="form-grid">
+
+                        <div class="form-field">
+                            <label for="category">類別</label>
+                            <select id="category" name="category">
+                                <option value=""></option>
+                                <option value="工程">工程</option>
+                                <option value="用地先期">用地先期</option>
+                                <option value="用地取得">用地取得</option>
+                                <option value="委託測設監造">委託測設監造</option>
+                                <option value="橋梁改建">橋梁改建</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="formDivision">分署別</label>
+                            <input id="formDivision" name="division" type="text" class="readonly-input" readonly>
+                            <div class="helper-text">由頁面上方「河川分署」選單帶入。</div>
+                        </div>
+
+<div class="form-field">
+    <label for="county">縣市</label>
+
+    <select
+        id="county"
+        name="county"
+        disabled
     >
-
-        <div class="form-row">
-            <label>案件名稱</label>
-            <input
-                type="text"
-                name="caseName"
-                required
-            >
-        </div>
-
-        <div class="form-row">
-            <label>承辦單位</label>
-            <input
-                type="text"
-                name="unit"
-            >
-        </div>
-
-        <div class="form-row">
-            <label>辦理情形</label>
-            <input
-                type="text"
-                name="status"
-            >
-        </div>
-
-        <div class="form-row">
-            <label>備註</label>
-            <textarea
-                name="note"
-                rows="4"
-            ></textarea>
-        </div>
-
-        <button type="submit">
-            儲存資料
-        </button>
-
-    </form>
-
-    <div id="saveMessage"></div>
-
+        <option value="">
+            請先選擇河川分署
+        </option>
+    </select>
 </div>
 
-<iframe
-    name="hiddenFrame"
-    id="hiddenFrame"
-    style="display:none;">
-</iframe>
+<div class="form-field">
+    <label for="township">鄉鎮市</label>
+    <select id="township" name="township" disabled>
+        <option value="">請先選擇縣市</option>
+    </select>
+</div>
 
-    <!-- Leaflet JS -->
-    <script
-        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-    </script>
+<div class="form-field">
+    <label for="riverSystem">水系</label>
+    <select id="riverSystem" name="riverSystem" disabled>
+        <option value="">請先選擇河川分署</option>
+    </select>
+</div>
+
+<div class="form-field">
+    <label for="creek">溪別</label>
+    <select id="creek" name="creek" disabled>
+        <option value="">請先選擇水系</option>
+    </select>
+</div>
+
+                        <div class="form-field full">
+                            <label for="caseName">案件名稱</label>
+                            <input id="caseName" name="caseName" type="text">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h3 class="form-section-title">提報工程內容</h3>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="structureName">建造物名稱</label>
+                            <input id="structureName" name="structureName" type="text">
+                        </div>
+                        <div class="form-field">
+                            <label for="leveeLength">堤防(公尺)</label>
+                            <input id="leveeLength" name="leveeLength" type="number" step="any">
+                        </div>
+                        <div class="form-field">
+                            <label for="revetmentLength">護岸(公尺)</label>
+                            <input id="revetmentLength" name="revetmentLength" type="number" step="any">
+                        </div>
+                        <div class="form-field full">
+                            <label for="otherWork">其他(請說明)</label>
+                            <textarea id="otherWork" name="otherWork"></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h3 class="form-section-title">預期工程效益</h3>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="protectedArea">保護面積(公頃)</label>
+                            <input id="protectedArea" name="protectedArea" type="number" step="any">
+                        </div>
+                        <div class="form-field">
+                            <label for="protectedPopulation">保護人口數(千人)</label>
+                            <input id="protectedPopulation" name="protectedPopulation" type="number" step="any">
+                        </div>
+                        <div class="form-field">
+                            <label for="ecoLandscapeLength">生態友善及地景營造長度(公尺)</label>
+                            <input id="ecoLandscapeLength" name="ecoLandscapeLength" type="number" step="any">
+                        </div>
+                        <div class="form-field">
+                            <label for="envImprovementArea">整體環境改善面積(公頃)</label>
+                            <input id="envImprovementArea" name="envImprovementArea" type="number" step="any">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h3 class="form-section-title">生態檢核、小水力及座標</h3>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="ecologyCheck">是否辦理核定階段生態檢核(是/否)</label>
+                            <select id="ecologyCheck" name="ecologyCheck">
+                                <option value=""></option>
+                                <option value="是">是</option>
+                                <option value="否">否</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="hydroScore">河川小水力發電潛力案場初評結果(請填列分數)
+分數≥4者，列為具潛力案例，可持續評估
+分數&lt;4者，列為不具潛力案例第二階段免評</label>
+                            <input id="hydroScore" name="hydroScore" type="number" step="any">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="coordinate">座標點位(TWD97，經緯度)</label>
+                            <input id="coordinate" name="coordinate" type="text">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h3 class="form-section-title">用地辦理情形</h3>
+                    <div class="form-grid">
+                        <div class="form-field full">
+                            <select id="landStatus" name="landStatus">
+                                <option value=""></option>
+                                <option value="A：已完成用地先期作業，接續辦理用地取得">A：已完成用地先期作業，接續辦理用地取得</option>
+                                <option value="B：已取得用地，接續辦理之工程">B：已取得用地，接續辦理之工程</option>
+                                <option value="C：辦理取得用地中，且接續辦理之工程">C：辦理取得用地中，且接續辦理之工程</option>
+                                <option value="D：其他(請說明)">D：其他(請說明)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="landAcquisitionCost">預估用地取得經費(千元)(僅類別屬用地先期需填列)</label>
+                            <input id="landAcquisitionCost" name="landAcquisitionCost" type="number" step="any">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="marketValuationSubmitted">用地案是否已送評定市價(是/否)</label>
+                            <select id="marketValuationSubmitted" name="marketValuationSubmitted">
+                                <option value=""></option>
+                                <option value="是">是</option>
+                                <option value="否">否</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h3 class="form-section-title">預定期程</h3>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="plannedStart">預定開工日期</label>
+                            <input id="plannedStart" name="plannedStart" type="date">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="plannedFinish">預定完工日期</label>
+                            <input id="plannedFinish" name="plannedFinish" type="date">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="plannedDuration">預定工期(月)</label>
+                            <input id="plannedDuration" name="plannedDuration" type="number" step="any">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h3 class="form-section-title">年度預估使用經費(千元)</h3>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="budget115">115年(A)</label>
+                            <input id="budget115" name="budget115" type="number" step="any">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="budget116">116年(B)</label>
+                            <input id="budget116" name="budget116" type="number" step="any">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="budget117">117年(C)</label>
+                            <input id="budget117" name="budget117" type="number" step="any">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="totalFunding">經費需求(千元)(D=A+B+C)</label>
+                            <input id="totalFunding" name="totalFunding" type="number" step="any" class="readonly-input" readonly>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="estimatedCarbon">預估碳排量(tCO2e)</label>
+                            <input id="estimatedCarbon" name="estimatedCarbon" type="number" step="any">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h3 class="form-section-title">備註</h3>
+                    <div class="form-grid one-col">
+                        <div class="form-field">
+                            <label for="remarks">備註(請填列關切人員或長官交辦紀錄等)</label>
+                            <textarea id="remarks" name="remarks" rows="5"></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="button-row">
+                    <button type="submit" class="primary-button">儲存資料</button>
+                    <span id="saveMessage"></span>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <iframe name="hiddenFrame" id="hiddenFrame" style="display:none;"></iframe>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzk4Ek12ShjL9wpQmU-d-eMhZAfVZ-g1JoGnCjgqoIsNmF6veB033Mt-GcyO_D94dPV/exec";
 
-let formSubmitted = false;
+        // -------------------------
+        // 地圖
+        // -------------------------
+        const map = L.map("map").setView([23.7, 120.9], 7);
 
-const businessForm = document.getElementById("businessForm");
-const hiddenFrame = document.getElementById("hiddenFrame");
-const saveMessage = document.getElementById("saveMessage");
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "&copy; OpenStreetMap contributors"
+        }).addTo(map);
 
-businessForm.addEventListener("submit", function () {
-
-    formSubmitted = true;
-
-    saveMessage.textContent = "資料儲存中...";
-
-});
-
-hiddenFrame.addEventListener("load", function () {
-
-    if (!formSubmitted) {
-        return;
-    }
-
-    formSubmitted = false;
-
-    saveMessage.textContent = "資料已送出。";
-
-    businessForm.reset();
-
-});
-
-        // 建立地圖
-        const map = L.map('map').setView(
-            [23.7, 120.9],
-            7
-        );
-
-        // 加入 OpenStreetMap
-        L.tileLayer(
-            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            {
-                attribution: '&copy; OpenStreetMap contributors'
-            }
-        ).addTo(map);
-
-
-        // 河川分署位置
-        // 第一版先使用大概位置測試
         const divisions = {
-
-            1: {
-                name: "第一河川分署",
-                lat: 24.75,
-                lng: 121.75
-            },
-
-            2: {
-                name: "第二河川分署",
-                lat: 24.8,
-                lng: 121.0
-            },
-
-            3: {
-                name: "第三河川分署",
-                lat: 24.2,
-                lng: 120.7
-            },
-
-            4: {
-                name: "第四河川分署",
-                lat: 23.9,
-                lng: 120.5
-            },
-
-            5: {
-                name: "第五河川分署",
-                lat: 23.5,
-                lng: 120.4
-            },
-
-            6: {
-                name: "第六河川分署",
-                lat: 23.0,
-                lng: 120.2
-            },
-
-            7: {
-                name: "第七河川分署",
-                lat: 22.65,
-                lng: 120.3
-            },
-
-            8: {
-                name: "第八河川分署",
-                lat: 22.75,
-                lng: 121.1
-            },
-
-            9: {
-                name: "第九河川分署",
-                lat: 23.98,
-                lng: 121.6
-            },
-
-            10: {
-                name: "第十河川分署",
-                lat: 25.05,
-                lng: 121.5
-            }
-
+            1: { name: "第一河川分署", lat: 24.75, lng: 121.75 },
+            2: { name: "第二河川分署", lat: 24.8, lng: 121.0 },
+            3: { name: "第三河川分署", lat: 24.2, lng: 120.7 },
+            4: { name: "第四河川分署", lat: 23.9, lng: 120.5 },
+            5: { name: "第五河川分署", lat: 23.5, lng: 120.4 },
+            6: { name: "第六河川分署", lat: 23.0, lng: 120.2 },
+            7: { name: "第七河川分署", lat: 22.65, lng: 120.3 },
+            8: { name: "第八河川分署", lat: 22.75, lng: 121.1 },
+            9: { name: "第九河川分署", lat: 23.98, lng: 121.6 },
+            10: { name: "第十河川分署", lat: 25.05, lng: 121.5 }
         };
 
+        let currentMarker = null;
 
-        let currentMarker;
+        const divisionSelect = document.getElementById("division");
+        const formDivision = document.getElementById("formDivision");
 
+        function syncDivisionToForm() {
+            const id = divisionSelect.value;
+            formDivision.value = id && divisions[id] ? divisions[id].name : "";
+        }
 
-        // 下拉選單事件
-        document
-            .getElementById("division")
-            .addEventListener("change", function () {
+        divisionSelect.addEventListener("change", function () {
+            const id = this.value;
+            syncDivisionToForm();
 
-                const id = this.value;
-
-                if (!id) {
-                    map.setView([23.7, 120.9], 7);
-                    return;
-                }
-
-                const data = divisions[id];
-
-                // 移動地圖
-                map.flyTo(
-                    [data.lat, data.lng],
-                    10
-                );
-
-
-                // 移除舊標記
+            if (!id) {
+                map.setView([23.7, 120.9], 7);
                 if (currentMarker) {
                     map.removeLayer(currentMarker);
+                    currentMarker = null;
                 }
+                return;
+            }
 
+            const data = divisions[id];
+            map.flyTo([data.lat, data.lng], 10);
 
-                // 加入新標記
-                currentMarker = L.marker(
-                    [data.lat, data.lng]
-                )
+            if (currentMarker) {
+                map.removeLayer(currentMarker);
+            }
+
+            currentMarker = L.marker([data.lat, data.lng])
                 .addTo(map)
                 .bindPopup(data.name)
                 .openPopup();
+        });
 
+        // -------------------------
+        // 頁籤
+        // -------------------------
+        const tabButtons = document.querySelectorAll(".tab-button");
+        const pages = document.querySelectorAll(".page");
+
+        tabButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                const targetPage = this.dataset.page;
+
+                tabButtons.forEach(btn => btn.classList.remove("active"));
+                pages.forEach(page => page.classList.remove("active"));
+
+                this.classList.add("active");
+                document.getElementById(targetPage).classList.add("active");
+
+                if (targetPage === "mapPage") {
+                    setTimeout(() => map.invalidateSize(), 100);
+                }
+
+                if (targetPage === "businessDataPage") {
+                    loadBusinessData();
+                }
             });
+        });
+
+        // -------------------------
+        // D=A+B+C 自動計算
+        // -------------------------
+        const budget115 = document.getElementById("budget115");
+        const budget116 = document.getElementById("budget116");
+        const budget117 = document.getElementById("budget117");
+        const totalFunding = document.getElementById("totalFunding");
+
+        function updateTotalFunding() {
+            const raw = [budget115.value, budget116.value, budget117.value];
+
+            if (raw.every(v => v === "")) {
+                totalFunding.value = "";
+                return;
+            }
+
+            const total = raw.reduce((sum, v) => sum + (Number(v) || 0), 0);
+            totalFunding.value = total;
+        }
+
+        [budget115, budget116, budget117].forEach(el => {
+            el.addEventListener("input", updateTotalFunding);
+        });
+
+        // -------------------------
+        // 儲存
+        // -------------------------
+        let formSubmitted = false;
+        const businessForm = document.getElementById("businessForm");
+        const hiddenFrame = document.getElementById("hiddenFrame");
+        const saveMessage = document.getElementById("saveMessage");
+
+        businessForm.addEventListener("submit", function () {
+            syncDivisionToForm();
+            updateTotalFunding();
+            formSubmitted = true;
+            saveMessage.textContent = "資料儲存中...";
+        });
+
+        hiddenFrame.addEventListener("load", function () {
+            if (!formSubmitted) return;
+
+            formSubmitted = false;
+            saveMessage.textContent = "✓ 資料已送出。";
+
+            businessForm.reset();
+            syncDivisionToForm();
+            updateTotalFunding();
+
+            // 重新讀取 Google Sheet，讓「提報內容」立即看到新資料
+            setTimeout(loadBusinessData, 900);
+        });
+
+        // -------------------------
+        // 讀取提報內容
+        // -------------------------
+        const businessDataBody = document.getElementById("businessDataBody");
+        const dataStatus = document.getElementById("dataStatus");
+        const refreshDataButton = document.getElementById("refreshDataButton");
+        let dataLoadTimer = null;
+
+        function loadBusinessData() {
+            dataStatus.textContent = "資料載入中...";
+            businessDataBody.innerHTML =
+                '<tr><td colspan="31" class="empty-row">資料載入中...</td></tr>';
+
+            const oldScript = document.getElementById("businessDataJsonp");
+            if (oldScript) oldScript.remove();
+
+            const script = document.createElement("script");
+            script.id = "businessDataJsonp";
+            script.src =
+                GAS_URL +
+                "?action=read&callback=handleBusinessData&_=" +
+                Date.now();
+
+            script.onerror = function () {
+                clearTimeout(dataLoadTimer);
+                dataStatus.textContent = "資料讀取失敗，請確認 Apps Script 已更新部署。";
+                businessDataBody.innerHTML =
+                    '<tr><td colspan="31" class="empty-row">無法讀取 Google Sheet 資料</td></tr>';
+            };
+
+            document.body.appendChild(script);
+
+            clearTimeout(dataLoadTimer);
+            dataLoadTimer = setTimeout(function () {
+                dataStatus.textContent = "資料讀取逾時，請確認 Apps Script 的部署設定。";
+            }, 10000);
+        }
+
+        function handleBusinessData(response) {
+            clearTimeout(dataLoadTimer);
+
+            if (!response || response.success !== true) {
+                const message = response && response.message ? response.message : "未知錯誤";
+                dataStatus.textContent = "資料讀取失敗：" + message;
+                businessDataBody.innerHTML =
+                    '<tr><td colspan="31" class="empty-row">無法讀取資料</td></tr>';
+                return;
+            }
+
+            const rows = Array.isArray(response.data) ? response.data : [];
+            businessDataBody.innerHTML = "";
+
+            if (rows.length === 0) {
+                dataStatus.textContent = "目前共有 0 筆資料";
+                businessDataBody.innerHTML = "";
+                return;
+            }
+
+            rows.forEach(function (rowData) {
+                const tr = document.createElement("tr");
+
+for (let i = 0; i < 36; i++) {
+
+    // Google Sheet AE～AI
+    // 為「河海組初擬意見」，網頁不顯示
+    if (i >= 30 && i <= 34) {
+        continue;
+    }
+
+    const td = document.createElement("td");
+
+    td.textContent =
+        rowData && rowData[i] !== undefined && rowData[i] !== null
+            ? rowData[i]
+            : "";
+
+    tr.appendChild(td);
+}
+
+                businessDataBody.appendChild(tr);
+            });
+
+            dataStatus.textContent = "目前共有 " + rows.length + " 筆資料";
+        }
+
+        refreshDataButton.addEventListener("click", loadBusinessData);
+
+        syncDivisionToForm();
+
+const townshipData = {
+
+    "臺北市": [
+        "中正區","大同區","中山區","松山區",
+        "大安區","萬華區","信義區","士林區",
+        "北投區","內湖區","南港區","文山區"
+    ],
+
+    "新北市": [
+        "板橋區","三重區","中和區","永和區","新莊區",
+        "新店區","樹林區","鶯歌區","三峽區","淡水區",
+        "汐止區","瑞芳區","土城區","蘆洲區","五股區",
+        "泰山區","林口區","深坑區","石碇區","坪林區",
+        "三芝區","石門區","八里區","平溪區","雙溪區",
+        "貢寮區","金山區","萬里區","烏來區"
+    ],
+
+    "桃園市": [
+        "桃園區","中壢區","平鎮區","八德區","楊梅區",
+        "蘆竹區","大溪區","龍潭區","龜山區","大園區",
+        "觀音區","新屋區","復興區"
+    ],
+
+    "臺中市": [
+        "中區","東區","南區","西區","北區",
+        "西屯區","南屯區","北屯區","豐原區","東勢區",
+        "大甲區","清水區","沙鹿區","梧棲區","后里區",
+        "神岡區","潭子區","大雅區","新社區","石岡區",
+        "外埔區","大安區","烏日區","大肚區","龍井區",
+        "霧峰區","太平區","大里區","和平區"
+    ],
+
+    "臺南市": [
+        "中西區","東區","南區","北區","安平區","安南區",
+        "永康區","歸仁區","新化區","左鎮區","玉井區",
+        "楠西區","南化區","仁德區","關廟區","龍崎區",
+        "官田區","麻豆區","佳里區","西港區","七股區",
+        "將軍區","學甲區","北門區","新營區","後壁區",
+        "白河區","東山區","六甲區","下營區","柳營區",
+        "鹽水區","善化區","大內區","山上區","新市區",
+        "安定區"
+    ],
+
+    "高雄市": [
+        "新興區","前金區","苓雅區","鹽埕區","鼓山區",
+        "旗津區","前鎮區","三民區","楠梓區","小港區",
+        "左營區","仁武區","大社區","岡山區","路竹區",
+        "阿蓮區","田寮區","燕巢區","橋頭區","梓官區",
+        "彌陀區","永安區","湖內區","鳳山區","大寮區",
+        "林園區","鳥松區","大樹區","旗山區","美濃區",
+        "六龜區","內門區","杉林區","甲仙區","桃源區",
+        "那瑪夏區","茂林區","茄萣區"
+    ],
+
+    "基隆市": [
+        "中正區","七堵區","暖暖區","仁愛區",
+        "中山區","安樂區","信義區"
+    ],
+
+    "新竹市": [
+        "東區","北區","香山區"
+    ],
+
+    "嘉義市": [
+        "東區","西區"
+    ],
+
+    "新竹縣": [
+        "竹北市","竹東鎮","新埔鎮","關西鎮",
+        "湖口鄉","新豐鄉","芎林鄉","橫山鄉",
+        "北埔鄉","寶山鄉","峨眉鄉","尖石鄉","五峰鄉"
+    ],
+
+    "苗栗縣": [
+        "苗栗市","頭份市","竹南鎮","後龍鎮","通霄鎮",
+        "苑裡鎮","卓蘭鎮","造橋鄉","西湖鄉","頭屋鄉",
+        "公館鄉","銅鑼鄉","三義鄉","大湖鄉","獅潭鄉",
+        "三灣鄉","南庄鄉","泰安鄉"
+    ],
+
+    "彰化縣": [
+        "彰化市","員林市","鹿港鎮","和美鎮","北斗鎮",
+        "溪湖鎮","田中鎮","二林鎮","線西鄉","伸港鄉",
+        "福興鄉","秀水鄉","花壇鄉","芬園鄉","大村鄉",
+        "埔鹽鄉","埔心鄉","永靖鄉","社頭鄉","二水鄉",
+        "田尾鄉","埤頭鄉","芳苑鄉","大城鄉","竹塘鄉",
+        "溪州鄉"
+    ],
+
+    "南投縣": [
+        "南投市","埔里鎮","草屯鎮","竹山鎮","集集鎮",
+        "名間鄉","鹿谷鄉","中寮鄉","魚池鄉","國姓鄉",
+        "水里鄉","信義鄉","仁愛鄉"
+    ],
+
+    "雲林縣": [
+        "斗六市","斗南鎮","虎尾鎮","西螺鎮","土庫鎮",
+        "北港鎮","古坑鄉","大埤鄉","莿桐鄉","林內鄉",
+        "二崙鄉","崙背鄉","麥寮鄉","東勢鄉","褒忠鄉",
+        "臺西鄉","元長鄉","四湖鄉","口湖鄉","水林鄉"
+    ],
+
+    "嘉義縣": [
+        "太保市","朴子市","布袋鎮","大林鎮",
+        "民雄鄉","溪口鄉","新港鄉","六腳鄉","東石鄉",
+        "義竹鄉","鹿草鄉","水上鄉","中埔鄉","竹崎鄉",
+        "梅山鄉","番路鄉","大埔鄉","阿里山鄉"
+    ],
+
+    "屏東縣": [
+        "屏東市","潮州鎮","東港鎮","恆春鎮","萬丹鄉",
+        "長治鄉","麟洛鄉","九如鄉","里港鄉","鹽埔鄉",
+        "高樹鄉","萬巒鄉","內埔鄉","竹田鄉","新埤鄉",
+        "枋寮鄉","新園鄉","崁頂鄉","林邊鄉","南州鄉",
+        "佳冬鄉","琉球鄉","車城鄉","滿州鄉","枋山鄉",
+        "三地門鄉","霧臺鄉","瑪家鄉","泰武鄉",
+        "來義鄉","春日鄉","獅子鄉","牡丹鄉"
+    ],
+
+    "宜蘭縣": [
+        "宜蘭市","羅東鎮","蘇澳鎮","頭城鎮",
+        "礁溪鄉","壯圍鄉","員山鄉","冬山鄉",
+        "五結鄉","三星鄉","大同鄉","南澳鄉"
+    ],
+
+    "花蓮縣": [
+        "花蓮市","鳳林鎮","玉里鎮","新城鄉","吉安鄉",
+        "壽豐鄉","光復鄉","豐濱鄉","瑞穗鄉",
+        "富里鄉","秀林鄉","萬榮鄉","卓溪鄉"
+    ],
+
+    "臺東縣": [
+        "臺東市","成功鎮","關山鎮","卑南鄉","鹿野鄉",
+        "池上鄉","東河鄉","長濱鄉","太麻里鄉",
+        "大武鄉","綠島鄉","海端鄉","延平鄉",
+        "金峰鄉","達仁鄉","蘭嶼鄉"
+    ],
+
+    "澎湖縣": [
+        "馬公市","湖西鄉","白沙鄉",
+        "西嶼鄉","望安鄉","七美鄉"
+    ],
+
+    "金門縣": [
+        "金城鎮","金湖鎮","金沙鎮",
+        "金寧鄉","烈嶼鄉","烏坵鄉"
+    ],
+
+    "連江縣": [
+        "南竿鄉","北竿鄉","莒光鄉","東引鄉"
+    ]
+};
+
+
+const countySelect = document.getElementById("county");
+const townshipSelect = document.getElementById("township");
+
+
+countySelect.addEventListener("change", function () {
+
+    const county = this.value;
+
+    // 清空原有內容
+    townshipSelect.innerHTML = "";
+
+    if (!county) {
+
+        townshipSelect.disabled = true;
+
+        townshipSelect.innerHTML =
+            '<option value="">請先選擇縣市</option>';
+
+        return;
+    }
+
+
+    // 啟用鄉鎮市選單
+    townshipSelect.disabled = false;
+
+    // 第一個提示選項
+    const firstOption = document.createElement("option");
+
+    firstOption.value = "";
+    firstOption.textContent = "請選擇鄉鎮市";
+
+    townshipSelect.appendChild(firstOption);
+
+
+    // 加入該縣市行政區
+    townshipData[county].forEach(function (township) {
+
+        const option = document.createElement("option");
+
+        option.value = township;
+        option.textContent = township;
+
+        townshipSelect.appendChild(option);
+
+    });
+
+});
+
+
+
+
+// =====================================================
+// 河川分署 → 水系
+// =====================================================
+
+const divisionRiverSystems = {
+
+    "1": [
+        "蘭陽溪水系",
+        "和平溪水系"
+    ],
+
+    "2": [
+        "鳳山溪水系",
+        "頭前溪水系",
+        "中港溪水系",
+        "後龍溪水系"
+    ],
+
+    "3": [
+        "大安溪水系",
+        "大甲溪水系",
+        "烏溪水系"
+    ],
+
+    "4": [
+        "濁水溪水系"
+    ],
+
+    "5": [
+        "北港溪水系",
+        "朴子溪水系",
+        "八掌溪水系",
+        "急水溪水系"
+    ],
+
+    "6": [
+        "曾文溪水系",
+        "鹽水溪水系",
+        "二仁溪水系",
+        "阿公店溪水系"
+    ],
+
+    "7": [
+        "高屏溪水系",
+        "東港溪水系",
+        "四重溪水系"
+    ],
+
+    "8": [
+        "卑南溪水系"
+    ],
+
+    "9": [
+        "花蓮溪水系",
+        "秀姑巒溪水系"
+    ],
+
+    "10": [
+        "淡水河水系",
+        "磺溪水系"
+    ]
+
+};
+
+// =====================================================
+// 水系 → 溪別
+// =====================================================
+
+const riverSystemCreeks = {
+
+    "蘭陽溪水系": [
+        "蘭陽溪",
+        "羅東溪",
+        "宜蘭河",
+        "大礁溪",
+        "小礁溪"
+    ],
+
+    "和平溪水系": [
+        "和平溪"
+    ],
+
+    "鳳山溪水系": [
+        "鳳山溪"
+    ],
+
+    "頭前溪水系": [
+        "頭前溪",
+        "油羅溪",
+        "上坪溪"
+    ],
+
+    "中港溪水系": [
+        "中港溪"
+    ],
+
+    "後龍溪水系": [
+        "後龍溪",
+        "老田寮溪"
+    ],
+
+    "大安溪水系": [
+        "大安溪",
+        "景山溪"
+    ],
+
+    "大甲溪水系": [
+        "大甲溪"
+    ],
+
+    "烏溪水系": [
+        "烏溪",
+        "貓羅溪",
+        "眉溪",
+        "北港溪",
+        "大里溪",
+        "旱溪",
+        "頭汴坑溪"
+    ],
+
+    "濁水溪水系": [
+        "濁水溪",
+        "清水溪",
+        "陳有蘭溪",
+        "東埔蚋溪"
+    ],
+
+    "北港溪水系": [
+        "北港溪"
+    ],
+
+    "朴子溪水系": [
+        "朴子溪"
+    ],
+
+    "八掌溪水系": [
+        "八掌溪"
+    ],
+
+    "急水溪水系": [
+        "急水溪"
+    ],
+
+    "曾文溪水系": [
+        "曾文溪",
+        "後堀溪",
+        "官田溪"
+    ],
+
+    "鹽水溪水系": [
+        "鹽水溪"
+    ],
+
+    "二仁溪水系": [
+        "二仁溪"
+    ],
+
+    "阿公店溪水系": [
+        "阿公店溪"
+    ],
+
+    "高屏溪水系": [
+        "高屏溪",
+        "旗山溪",
+        "美濃溪",
+        "隘寮溪",
+        "武洛溪"
+    ],
+
+    "東港溪水系": [
+        "東港溪"
+    ],
+
+    "四重溪水系": [
+        "四重溪"
+    ],
+
+    "卑南溪水系": [
+        "卑南溪",
+        "鹿野溪",
+        "鹿寮溪"
+    ],
+
+    "花蓮溪水系": [
+        "花蓮溪",
+        "木瓜溪",
+        "壽豐溪",
+        "萬里溪",
+        "馬太鞍溪",
+        "光復溪"
+    ],
+
+    "秀姑巒溪水系": [
+        "秀姑巒溪",
+        "富源溪",
+        "紅葉溪",
+        "豐坪溪",
+        "樂樂溪"
+    ],
+
+    "淡水河水系": [
+        "淡水河",
+        "大漢溪",
+        "三峽河",
+        "新店溪",
+        "基隆河",
+        "北勢溪",
+        "景美溪"
+    ],
+
+    "磺溪水系": [
+        "磺溪"
+    ]
+
+};
+
+const riverSystemSelect =
+    document.getElementById("riverSystem");
+
+const creekSelect =
+    document.getElementById("creek");
+
+
+// =====================================================
+// 依河川分署更新水系
+// =====================================================
+
+function updateRiverSystemOptions(divisionId) {
+
+    riverSystemSelect.innerHTML = "";
+    creekSelect.innerHTML = "";
+
+
+    // 沒有選分署
+    if (!divisionId || !divisionRiverSystems[divisionId]) {
+
+        riverSystemSelect.disabled = true;
+
+        riverSystemSelect.innerHTML =
+            '<option value="">請先選擇河川分署</option>';
+
+
+        creekSelect.disabled = true;
+
+        creekSelect.innerHTML =
+            '<option value="">請先選擇水系</option>';
+
+        return;
+    }
+
+
+    // 啟用水系選單
+    riverSystemSelect.disabled = false;
+
+
+    // 第一個提示
+    const firstOption =
+        document.createElement("option");
+
+    firstOption.value = "";
+    firstOption.textContent = "請選擇水系";
+
+    riverSystemSelect.appendChild(firstOption);
+
+
+    // 加入該分署的水系
+    divisionRiverSystems[divisionId]
+        .forEach(function(system) {
+
+            const option =
+                document.createElement("option");
+
+            option.value = system;
+            option.textContent = system;
+
+            riverSystemSelect.appendChild(option);
+
+        });
+
+
+    // 水系重新選擇後，溪別也要清空
+    creekSelect.disabled = true;
+
+    creekSelect.innerHTML =
+        '<option value="">請先選擇水系</option>';
+
+}
+
+
+
+// =====================================================
+// 依水系更新溪別
+// =====================================================
+
+function updateCreekOptions(riverSystem) {
+
+    creekSelect.innerHTML = "";
+
+
+    if (
+        !riverSystem ||
+        !riverSystemCreeks[riverSystem]
+    ) {
+
+        creekSelect.disabled = true;
+
+        creekSelect.innerHTML =
+            '<option value="">請先選擇水系</option>';
+
+        return;
+    }
+
+
+    creekSelect.disabled = false;
+
+
+    const firstOption =
+        document.createElement("option");
+
+    firstOption.value = "";
+    firstOption.textContent = "請選擇溪別";
+
+    creekSelect.appendChild(firstOption);
+
+
+    riverSystemCreeks[riverSystem]
+        .forEach(function(creek) {
+
+            const option =
+                document.createElement("option");
+
+            option.value = creek;
+            option.textContent = creek;
+
+            creekSelect.appendChild(option);
+
+        });
+
+}
+
+// 上方河川分署改變
+divisionSelect.addEventListener(
+    "change",
+    function () {
+
+        // 更新縣市
+        updateCountyOptions(
+            this.value
+        );
+
+
+        // 更新水系
+        updateRiverSystemOptions(
+            this.value
+        );
+
+    }
+);
+
+
+// 水系改變
+riverSystemSelect.addEventListener(
+    "change",
+    function () {
+
+        updateCreekOptions(
+            this.value
+        );
+
+    }
+);
+
+// =====================================================
+// 河川分署 → 縣市
+// 依中央管河川流域涉及縣市設定
+// =====================================================
+
+const divisionCounties = {
+
+    "1": [
+        "宜蘭縣",
+        "連江縣"
+    ],
+
+    "2": [
+        "桃園市",
+        "新竹縣",
+        "新竹市",
+        "苗栗縣"
+    ],
+
+    "3": [
+        "苗栗縣",
+        "臺中市",
+        "南投縣",
+        "彰化縣"
+    ],
+
+    "4": [
+        "彰化縣",
+        "南投縣",
+    ],
+
+    "5": [
+        "雲林縣",
+        "嘉義縣",
+        "嘉義市",
+        "臺南市"
+    ],
+
+    "6": [
+        "臺南市",
+        "高雄市"
+    ],
+
+    "7": [
+        "高雄市",
+        "屏東縣"
+    ],
+
+    "8": [
+        "臺東縣"
+    ],
+
+    "9": [
+        "花蓮縣",
+    ],
+
+    "10": [
+        "臺北市",
+        "新北市",
+        "桃園市",
+        "基隆市"
+    ]
+
+};
+
+// =====================================================
+// 依河川分署更新縣市
+// =====================================================
+
+function updateCountyOptions(divisionId) {
+
+    // 清除舊縣市
+    countySelect.innerHTML = "";
+
+    // 清除舊鄉鎮市
+    townshipSelect.innerHTML = "";
+
+
+    // 尚未選河川分署
+    if (
+        !divisionId ||
+        !divisionCounties[divisionId]
+    ) {
+
+        countySelect.disabled = true;
+
+        countySelect.innerHTML =
+            '<option value="">請先選擇河川分署</option>';
+
+
+        townshipSelect.disabled = true;
+
+        townshipSelect.innerHTML =
+            '<option value="">請先選擇縣市</option>';
+
+        return;
+    }
+
+
+    // 啟用縣市
+    countySelect.disabled = false;
+
+
+    // 第一個提示選項
+    const firstOption =
+        document.createElement("option");
+
+    firstOption.value = "";
+
+    firstOption.textContent =
+        "請選擇縣市";
+
+    countySelect.appendChild(
+        firstOption
+    );
+
+
+    // 加入該河川分署對應縣市
+    divisionCounties[divisionId]
+        .forEach(function(county) {
+
+            const option =
+                document.createElement("option");
+
+            option.value = county;
+
+            option.textContent = county;
+
+            countySelect.appendChild(
+                option
+            );
+
+        });
+
+
+    // 河川分署改變後，
+    // 鄉鎮市必須重新選擇
+    townshipSelect.disabled = true;
+
+    townshipSelect.innerHTML =
+        '<option value="">請先選擇縣市</option>';
+
+}
+
 
     </script>
 
