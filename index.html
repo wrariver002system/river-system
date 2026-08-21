@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>河川分署業務查詢系統</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
     <style>
         * { box-sizing: border-box; }
 
@@ -244,6 +244,48 @@
             min-width: 260px;
         }
 
+        .view-line-button {
+            padding: 7px 12px;
+            border: 1px solid #1565c0;
+            background: white;
+            color: #1565c0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .view-line-button:hover {
+            background: #eef5fd;
+        }
+
+        .case-name-line-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 240px;
+        }
+
+        .case-name-text {
+            flex: 1 1 auto;
+            min-width: 0;
+            word-break: break-word;
+        }
+
+        .case-name-line-wrap .view-line-button {
+            flex: 0 0 auto;
+        }
+
+        #viewLineMap {
+            width: 100%;
+            height: 560px;
+        }
+
+        .view-line-status {
+            color: #555;
+            line-height: 1.6;
+        }
+
         .empty-row {
             text-align: center !important;
             color: #777;
@@ -264,6 +306,492 @@
             .tab-button { flex: 1; padding: 12px 5px; font-size: 14px; }
             .data-header { align-items: flex-start; flex-direction: column; }
         }
+
+.coordinate-input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.coordinate-input-row input {
+    flex: 1;
+}
+
+.map-select-button {
+    white-space: nowrap;
+    padding: 10px 16px;
+    border: 1px solid #1565c0;
+    background: white;
+    color: #1565c0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 15px;
+}
+
+
+/* 地圖選點視窗 */
+.coordinate-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    padding: 30px;
+}
+
+.coordinate-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coordinate-modal-content {
+    background: white;
+    width: min(1000px, 95vw);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.coordinate-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid #ddd;
+}
+
+.coordinate-modal-header h3 {
+    margin: 0;
+}
+
+.close-map-button {
+    border: none;
+    background: transparent;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+#coordinateMap {
+    width: 100%;
+    height: 520px;
+}
+
+.coordinate-map-info {
+    padding: 14px 18px;
+}
+
+.coordinate-map-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.line-draw-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.line-status {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    color: #555;
+}
+
+/* 工程線形地圖視窗 */
+
+.line-map-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.line-map-modal.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.line-map-modal-content {
+    width: min(1100px, 96vw);
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.line-map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px 18px;
+    border-bottom: 1px solid #ddd;
+}
+
+.line-map-header h3 {
+    margin: 0 0 5px;
+}
+
+.line-map-help {
+    color: #666;
+    font-size: 14px;
+}
+
+.close-map-button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 28px;
+}
+
+#lineMap {
+    height: 560px;
+    width: 100%;
+}
+
+.line-map-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 18px;
+}
+
+.line-map-actions {
+    display: flex;
+    gap: 10px;
+}
+
+@media (max-width: 700px) {
+
+    .line-map-modal {
+        padding: 10px;
+    }
+
+    #lineMap {
+        height: 430px;
+    }
+
+    .line-map-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+}
+
+
+/* =====================================================
+   已提報案件管理
+   ===================================================== */
+.case-management-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0 0 18px;
+}
+
+.case-management-toolbar .active-mode {
+    background: #1565c0;
+    color: white;
+    border-color: #1565c0;
+}
+
+#editModeStatus {
+    margin-left: 6px;
+    font-weight: bold;
+    color: #c62828;
+}
+
+.case-manager-panel {
+    display: none;
+    margin-bottom: 20px;
+    border: 1px solid #d8d8d8;
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.case-manager-panel.show {
+    display: block;
+}
+
+.case-manager-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #f6f8fa;
+    border-bottom: 1px solid #ddd;
+}
+
+.case-manager-heading h3 {
+    margin: 0;
+    font-size: 17px;
+}
+
+#caseManagerStatus {
+    padding: 10px 14px;
+    color: #666;
+}
+
+.case-manager-table-wrap {
+    overflow-x: auto;
+}
+
+.case-manager-table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+}
+
+.case-manager-table th,
+.case-manager-table td {
+    border: 1px solid #ddd;
+    padding: 9px 10px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.case-manager-table th {
+    background: #EBF1DE;
+    text-align: center;
+}
+
+.case-manager-table td:first-child,
+.case-manager-table td:last-child {
+    text-align: center;
+}
+
+.case-action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    white-space: nowrap;
+}
+
+.case-edit-button,
+.case-delete-button {
+    border-radius: 4px;
+    padding: 7px 11px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.case-edit-button {
+    border: 1px solid #1565c0;
+    background: white;
+    color: #1565c0;
+}
+
+.case-delete-button {
+    border: 1px solid #c62828;
+    background: white;
+    color: #c62828;
+}
+
+/* =====================================================
+   附表統計儀表板
+   ===================================================== */
+
+.appendix-dashboard {
+    margin: 18px 0 22px;
+}
+
+/* 提報內容：左側儀表板 + 右側提報工程位置總覽 */
+.content-overview-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr);
+    gap: 16px;
+    align-items: stretch;
+    margin-bottom: 22px;
+}
+
+.content-overview-grid .appendix-dashboard {
+    margin: 0;
+}
+
+.content-overview-grid .dashboard-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.content-overview-grid .dashboard-breakdowns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.overview-line-map-panel {
+    min-width: 0;
+    border: 1px solid #d8e0e8;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.overview-line-map-header {
+    padding: 13px 16px;
+    border-bottom: 1px solid #e1e5ea;
+    background: #f8fafc;
+}
+
+.overview-line-map-header h3 {
+    margin: 0 0 5px;
+    font-size: 16px;
+}
+
+#overviewLineMapStatus {
+    color: #666;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+#overviewLineMap {
+    width: 100%;
+    min-height: 420px;
+    flex: 1 1 auto;
+}
+
+.overview-line-popup-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.overview-line-popup-meta {
+    color: #555;
+    line-height: 1.45;
+}
+
+@media (max-width: 1100px) {
+    .content-overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #overviewLineMap {
+        min-height: 380px;
+    }
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.dashboard-card {
+    background: white;
+    border: 1px solid #d8e0e8;
+    border-radius: 8px;
+    padding: 16px 18px;
+}
+
+.dashboard-card-label {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.dashboard-card-value {
+    font-size: 25px;
+    font-weight: bold;
+    color: #1565c0;
+}
+
+.dashboard-card-unit {
+    font-size: 14px;
+    color: #666;
+    margin-left: 4px;
+}
+
+.dashboard-breakdowns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.dashboard-panel {
+    border: 1px solid #d8e0e8;
+    border-radius: 8px;
+    background: white;
+    padding: 15px 18px;
+}
+
+.dashboard-panel-title {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.dashboard-bar-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 55px;
+    align-items: center;
+    gap: 10px;
+    margin: 9px 0;
+}
+
+.dashboard-bar-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dashboard-bar-track {
+    height: 10px;
+    background: #eeeeee;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.dashboard-bar {
+    height: 100%;
+    background: #1565c0;
+    border-radius: 999px;
+}
+
+.dashboard-bar-value {
+    text-align: right;
+    color: #555;
+}
+
+.dashboard-empty {
+    color: #777;
+    padding: 10px 0;
+}
+
+@media (max-width: 900px) {
+
+    .dashboard-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-breakdowns {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 520px) {
+
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+
+}
+
     </style>
 </head>
 
@@ -307,6 +835,30 @@
 
             <div id="dataStatus">尚未載入資料</div>
 
+            <div class="content-overview-grid">
+
+                <div
+                    id="contentDashboard"
+                    class="appendix-dashboard"
+                ></div>
+
+                <section class="overview-line-map-panel">
+
+                    <div class="overview-line-map-header">
+                        <div>
+                            <h3>提報工程位置</h3>
+                            <div id="overviewLineMapStatus">
+                                線形資料尚未載入
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="overviewLineMap"></div>
+
+                </section>
+
+            </div>
+
             <div class="table-wrap">
                 <table class="business-table">
                     <thead>
@@ -348,15 +900,17 @@
                             <th>預估用地取得經費(千元)<br>(僅類別屬用地先期需填列)</th>
                             <th>用地案是否已送評定市價<br>(是/否)</th>
 
-                            <th>115年<br>(A)</th>
-                            <th>116年<br>(B)</th>
-                            <th>117年<br>(C)</th>
+                            <th>116年<br>(A)</th>
+                            <th>117年<br>(B)</th>
+                            <th>118年以後(含)<br>(C)</th>
 
                         </tr>
                     </thead>
                     <tbody id="businessDataBody"></tbody>
                 </table>
             </div>
+
+
         </div>
     </div>
 
@@ -365,7 +919,41 @@
 
             <h2>附表1-「基礎設施防護-中央管河川整體改善」案件資料登錄</h2>
 
+            <div class="case-management-toolbar">
+                <button type="button" id="newCaseButton" class="secondary-button active-mode">＋ 新增案件</button>
+                <button type="button" id="showCaseManagerButton" class="secondary-button">📂 已提報案件管理</button>
+                <span id="editModeStatus"></span>
+            </div>
+
+            <div id="caseManagerPanel" class="case-manager-panel">
+                <div class="case-manager-heading">
+                    <h3>已提報案件管理</h3>
+                    <button type="button" id="reloadCaseManagerButton" class="secondary-button">重新載入</button>
+                </div>
+                <div id="caseManagerStatus">請選擇河川分署後載入案件。</div>
+                <div class="case-manager-table-wrap">
+                    <table class="case-manager-table">
+                        <thead>
+                            <tr>
+                                <th>項次</th>
+                                <th>案件名稱</th>
+                                <th>縣市</th>
+                                <th>鄉鎮市</th>
+                                <th>水系</th>
+                                <th>溪別</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="caseManagerBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <form id="businessForm" action="https://script.google.com/macros/s/AKfycbzk4Ek12ShjL9wpQmU-d-eMhZAfVZ-g1JoGnCjgqoIsNmF6veB033Mt-GcyO_D94dPV/exec" method="POST" target="hiddenFrame">
+
+                <input type="hidden" id="caseId" name="caseId" value="">
+                <input type="hidden" id="operation" name="operation" value="create">
+                <input type="hidden" id="lineChanged" name="lineChanged" value="0">
 
                 <section class="form-section">
                     <h3 class="form-section-title">基本資料</h3>
@@ -494,12 +1082,85 @@
                             <input id="hydroScore" name="hydroScore" type="number" step="any">
                         </div>
 
-                        <div class="form-field">
-                            <label for="coordinate">座標點位(TWD97，經緯度)</label>
-                            <input id="coordinate" name="coordinate" type="text">
-                        </div>
+<div class="form-field">
+    <label for="coordinate">座標點位(TWD97，經緯度)</label>
+
+    <div class="coordinate-input-row">
+
+        <input
+            id="coordinate"
+            name="coordinate"
+            type="text"
+            readonly
+            placeholder="請使用地圖選點"
+        >
+
+        <button
+            type="button"
+            id="openCoordinateMap"
+            class="map-select-button"
+        >
+            📍 地圖選點
+        </button>
+
+    </div>
+</div>
                     </div>
                 </section>
+
+<section class="form-section">
+
+    <h3 class="form-section-title">
+        工程線形
+    </h3>
+
+    <div class="form-grid one-col">
+
+        <div class="form-field">
+
+            <div class="line-draw-row">
+
+                <button
+                    type="button"
+                    id="openLineMap"
+                    class="map-select-button"
+                >
+                    🖊 繪製工程線形
+                </button>
+
+                <button
+                    type="button"
+                    id="clearLine"
+                    class="secondary-button"
+                    disabled
+                >
+                    清除線形
+                </button>
+
+            </div>
+
+            <div
+                id="lineStatus"
+                class="line-status"
+            >
+                尚未繪製工程線形
+            </div>
+
+            <!--
+                真正送給 Apps Script 的 GeoJSON
+                使用者不需要看到
+            -->
+            <input
+                type="hidden"
+                id="lineGeoJSON"
+                name="lineGeoJSON"
+            >
+
+        </div>
+
+    </div>
+
+</section>
 
                 <section class="form-section">
                     <h3 class="form-section-title">用地辦理情形</h3>
@@ -554,18 +1215,18 @@
                     <h3 class="form-section-title">年度預估使用經費(千元)</h3>
                     <div class="form-grid">
                         <div class="form-field">
-                            <label for="budget115">115年(A)</label>
-                            <input id="budget115" name="budget115" type="number" step="any">
-                        </div>
-
-                        <div class="form-field">
-                            <label for="budget116">116年(B)</label>
+                            <label for="budget116">116年(A)</label>
                             <input id="budget116" name="budget116" type="number" step="any">
                         </div>
 
                         <div class="form-field">
-                            <label for="budget117">117年(C)</label>
+                            <label for="budget117">117年(B)</label>
                             <input id="budget117" name="budget117" type="number" step="any">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="budget118">118年以後(含)(C)</label>
+                            <input id="budget118" name="budget118" type="number" step="any">
                         </div>
 
                         <div class="form-field">
@@ -591,7 +1252,8 @@
                 </section>
 
                 <div class="button-row">
-                    <button type="submit" class="primary-button">儲存資料</button>
+                    <button type="submit" class="primary-button" id="saveCaseButton">儲存資料</button>
+                    <button type="button" class="secondary-button" id="cancelEditButton" style="display:none;">取消修改</button>
                     <span id="saveMessage"></span>
                 </div>
 
@@ -601,7 +1263,203 @@
 
     <iframe name="hiddenFrame" id="hiddenFrame" style="display:none;"></iframe>
 
+    <form id="deleteCaseForm" action="https://script.google.com/macros/s/AKfycbzk4Ek12ShjL9wpQmU-d-eMhZAfVZ-g1JoGnCjgqoIsNmF6veB033Mt-GcyO_D94dPV/exec" method="POST" target="deleteFrame" style="display:none;">
+        <input type="hidden" name="operation" value="delete">
+        <input type="hidden" id="deleteCaseId" name="caseId" value="">
+    </form>
+    <iframe name="deleteFrame" id="deleteFrame" style="display:none;"></iframe>
+
+<div
+    id="coordinateModal"
+    class="coordinate-modal"
+>
+
+    <div class="coordinate-modal-content">
+
+        <div class="coordinate-modal-header">
+
+            <h3>選擇工程位置</h3>
+
+            <button
+                type="button"
+                id="closeCoordinateMap"
+                class="close-map-button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div id="coordinateMap"></div>
+
+
+        <div class="coordinate-map-info">
+
+            <div>
+                已選座標：
+                <strong id="selectedCoordinate">
+                    尚未選取
+                </strong>
+            </div>
+
+            <div class="coordinate-map-actions">
+
+                <button
+                    type="button"
+                    id="cancelCoordinate"
+                    class="secondary-button"
+                >
+                    取消
+                </button>
+
+                <button
+                    type="button"
+                    id="confirmCoordinate"
+                    class="primary-button"
+                    disabled
+                >
+                    確定使用此座標
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    id="lineMapModal"
+    class="line-map-modal"
+>
+
+    <div class="line-map-modal-content">
+
+        <div class="line-map-header">
+
+            <div>
+                <h3>工程線形繪製</h3>
+
+                <div class="line-map-help">
+                    請使用左側繪圖工具開始畫線；依序點選工程線形節點，完成後可再編輯節點。
+                </div>
+            </div>
+
+            <button
+                type="button"
+                id="closeLineMap"
+                class="close-map-button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div id="lineMap"></div>
+
+
+        <div class="line-map-footer">
+
+            <div>
+
+                <div>
+                    線形／節點：
+                    <strong id="linePointCount">0</strong>
+                </div>
+
+                <div>
+                    概略長度：
+                    <strong id="lineLength">
+                        0 m
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="line-map-actions">
+
+                <button
+                    type="button"
+                    id="cancelLineMap"
+                    class="secondary-button"
+                >
+                    取消
+                </button>
+
+                <button
+                    type="button"
+                    id="confirmLineMap"
+                    class="primary-button"
+                    disabled
+                >
+                    確定使用此線形
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    id="viewLineModal"
+    class="line-map-modal"
+>
+    <div class="line-map-modal-content">
+
+        <div class="line-map-header">
+            <div>
+                <h3 id="viewLineTitle">工程線形</h3>
+                <div
+                    id="viewLineInfo"
+                    class="line-map-help"
+                ></div>
+            </div>
+
+            <button
+                type="button"
+                id="closeViewLineMap"
+                class="close-map-button"
+            >
+                ×
+            </button>
+        </div>
+
+        <div id="viewLineMap"></div>
+
+        <div class="line-map-footer">
+
+            <div
+                id="viewLineStatus"
+                class="view-line-status"
+            >
+                線形資料載入中...
+            </div>
+
+            <div class="line-map-actions">
+                <button
+                    type="button"
+                    id="closeViewLineMapBottom"
+                    class="secondary-button"
+                >
+                    關閉
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbzk4Ek12ShjL9wpQmU-d-eMhZAfVZ-g1JoGnCjgqoIsNmF6veB033Mt-GcyO_D94dPV/exec";
@@ -664,6 +1522,468 @@
                 .openPopup();
         });
 
+// =====================================================
+// 工程線形繪製
+// =====================================================
+
+const lineMapModal = document.getElementById("lineMapModal");
+const openLineMapButton = document.getElementById("openLineMap");
+const closeLineMapButton = document.getElementById("closeLineMap");
+const cancelLineMapButton = document.getElementById("cancelLineMap");
+const confirmLineMapButton = document.getElementById("confirmLineMap");
+const clearLineButton = document.getElementById("clearLine");
+
+const lineGeoJSONInput = document.getElementById("lineGeoJSON");
+const lineChangedInput = document.getElementById("lineChanged");
+const lineStatus = document.getElementById("lineStatus");
+const linePointCount = document.getElementById("linePointCount");
+const lineLength = document.getElementById("lineLength");
+
+let lineMap = null;
+let drawnItems = null;
+
+
+/**
+ * 將 Leaflet 的 LatLng 巢狀結構拆成多個單一線段。
+ * 可同時處理一般 Polyline 與 MultiPolyline。
+ */
+function getLineParts_(latlngs) {
+
+    if (!Array.isArray(latlngs) || latlngs.length === 0) {
+        return [];
+    }
+
+    if (
+        latlngs[0] &&
+        typeof latlngs[0].lat === "number" &&
+        typeof latlngs[0].lng === "number"
+    ) {
+        return [latlngs];
+    }
+
+    let result = [];
+
+    latlngs.forEach(function(part) {
+        result = result.concat(getLineParts_(part));
+    });
+
+    return result;
+}
+
+
+/**
+ * 統計目前編輯器內所有線段的數量、節點數與總長度。
+ */
+function getLineSummary_() {
+
+    const summary = {
+        lineCount: 0,
+        totalPoints: 0,
+        totalLength: 0
+    };
+
+    if (!drawnItems) {
+        return summary;
+    }
+
+    drawnItems.eachLayer(function(layer) {
+
+        if (!layer || typeof layer.getLatLngs !== "function") {
+            return;
+        }
+
+        const parts = getLineParts_(layer.getLatLngs());
+
+        parts.forEach(function(latlngs) {
+
+            if (latlngs.length < 2) {
+                return;
+            }
+
+            summary.lineCount++;
+            summary.totalPoints += latlngs.length;
+
+            for (let i = 1; i < latlngs.length; i++) {
+                summary.totalLength +=
+                    latlngs[i - 1].distanceTo(latlngs[i]);
+            }
+        });
+    });
+
+    return summary;
+}
+
+
+function formatLineLength(length) {
+
+    if (length >= 1000) {
+        return (length / 1000).toFixed(2) + " km";
+    }
+
+    return Math.round(length) + " m";
+}
+
+
+/**
+ * 更新工程線形視窗下方的統計資訊。
+ */
+function updateLineInformation() {
+
+    const summary = getLineSummary_();
+
+    if (summary.lineCount === 0) {
+        linePointCount.textContent = "0";
+        lineLength.textContent = "0 m";
+        confirmLineMapButton.disabled = true;
+        return;
+    }
+
+    linePointCount.textContent =
+        summary.lineCount +
+        " 段／" +
+        summary.totalPoints +
+        " 個節點";
+
+    lineLength.textContent =
+        formatLineLength(summary.totalLength);
+
+    confirmLineMapButton.disabled = false;
+}
+
+
+/**
+ * 第一次使用時建立 Leaflet.draw 編輯器。
+ * 同一案件可以保留多條線，不再清除前一條。
+ */
+function initializeLineMap() {
+
+    if (lineMap) {
+        return;
+    }
+
+    lineMap = L.map("lineMap").setView([23.7, 120.9], 7);
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            attribution: "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(lineMap);
+
+    drawnItems = new L.FeatureGroup();
+    lineMap.addLayer(drawnItems);
+
+    const drawControl = new L.Control.Draw({
+        draw: {
+            polyline: true,
+            polygon: false,
+            rectangle: false,
+            circle: false,
+            circlemarker: false,
+            marker: false
+        },
+        edit: {
+            featureGroup: drawnItems,
+            edit: true,
+            remove: true
+        }
+    });
+
+    lineMap.addControl(drawControl);
+
+    // 新增一段線形
+    lineMap.on(L.Draw.Event.CREATED, function(event) {
+        drawnItems.addLayer(event.layer);
+        updateLineInformation();
+    });
+
+    // 編輯既有線形
+    lineMap.on(L.Draw.Event.EDITED, function() {
+        updateLineInformation();
+    });
+
+    // 刪除其中一段線形
+    lineMap.on(L.Draw.Event.DELETED, function() {
+        updateLineInformation();
+    });
+}
+
+
+/**
+ * 開啟工程線形繪製視窗。
+ * 有既有線形時顯示全部線段，否則定位到目前河川分署附近。
+ */
+function openLineMap() {
+
+    const divisionId = divisionSelect.value;
+
+    if (!divisionId) {
+        alert("請先從頁面上方選擇河川分署。");
+        return;
+    }
+
+    initializeLineMap();
+    lineMapModal.classList.add("show");
+
+    setTimeout(function() {
+
+        lineMap.invalidateSize();
+
+        if (
+            drawnItems &&
+            drawnItems.getLayers().length > 0
+        ) {
+            lineMap.fitBounds(
+                drawnItems.getBounds(),
+                {
+                    padding: [50, 50]
+                }
+            );
+            return;
+        }
+
+        const divisionData = divisions[divisionId];
+
+        lineMap.setView(
+            [divisionData.lat, divisionData.lng],
+            divisionData.zoom || 9
+        );
+
+    }, 150);
+}
+
+
+/**
+ * 將編輯器內的所有線段統一存成 GeoJSON MultiLineString。
+ * 即使只有一段，也統一使用 MultiLineString，方便後續 SHP 輸出。
+ */
+function confirmLineMap() {
+
+    const summary = getLineSummary_();
+
+    if (summary.lineCount === 0) {
+        alert("尚未完成有效的工程線形。");
+        return;
+    }
+
+    const coordinates = [];
+
+    drawnItems.eachLayer(function(layer) {
+
+        if (!layer || typeof layer.getLatLngs !== "function") {
+            return;
+        }
+
+        const parts = getLineParts_(layer.getLatLngs());
+
+        parts.forEach(function(latlngs) {
+
+            if (latlngs.length < 2) {
+                return;
+            }
+
+            coordinates.push(
+                latlngs.map(function(point) {
+                    // GeoJSON 座標順序：[經度, 緯度]
+                    return [point.lng, point.lat];
+                })
+            );
+        });
+    });
+
+    const geojson = {
+        type: "Feature",
+        properties: {},
+        geometry: {
+            type: "MultiLineString",
+            coordinates: coordinates
+        }
+    };
+
+    lineGeoJSONInput.value = JSON.stringify(geojson);
+
+    // CRUD 修改案件時，告訴 Apps Script 線形已經被使用者修改。
+    lineChangedInput.value = "1";
+
+    lineStatus.textContent =
+        "✓ 已完成工程線形，" +
+        summary.lineCount +
+        " 段，" +
+        summary.totalPoints +
+        " 個節點，概略總長度 " +
+        formatLineLength(summary.totalLength);
+
+    clearLineButton.disabled = false;
+    lineMapModal.classList.remove("show");
+}
+
+
+/**
+ * 使用者主動清除所有線形。
+ */
+function clearLine() {
+
+    if (!confirm("確定要清除目前工程線形嗎？")) {
+        return;
+    }
+
+    if (drawnItems) {
+        drawnItems.clearLayers();
+    }
+
+    lineGeoJSONInput.value = "";
+
+    // 修改案件時，空白 GeoJSON + lineChanged=1 代表刪除原線形。
+    lineChangedInput.value = "1";
+
+    lineStatus.textContent = "尚未繪製工程線形";
+    clearLineButton.disabled = true;
+
+    updateLineInformation();
+}
+
+
+/**
+ * 僅重設前端狀態，不代表使用者真的修改線形。
+ * 用於切換新增案件、載入修改案件等情境。
+ */
+function resetLineStateSilently() {
+
+    if (drawnItems) {
+        drawnItems.clearLayers();
+    }
+
+    lineGeoJSONInput.value = "";
+    lineStatus.textContent = "尚未繪製工程線形";
+    clearLineButton.disabled = true;
+
+    updateLineInformation();
+}
+
+
+/**
+ * 載入已儲存的 GeoJSON 到線形編輯器。
+ * 同時相容舊的 LineString 與新的 MultiLineString。
+ */
+function restoreLineFromGeoJSON(geojsonText) {
+
+    if (!geojsonText) {
+        resetLineStateSilently();
+        return false;
+    }
+
+    initializeLineMap();
+    drawnItems.clearLayers();
+
+    try {
+
+        const geojson =
+            typeof geojsonText === "string"
+                ? JSON.parse(geojsonText)
+                : geojsonText;
+
+        const geometry =
+            geojson && geojson.type === "Feature"
+                ? geojson.geometry
+                : geojson;
+
+        if (!geometry) {
+            throw new Error("找不到 geometry");
+        }
+
+        const addLine = function(coordinates) {
+
+            if (!Array.isArray(coordinates) || coordinates.length < 2) {
+                return;
+            }
+
+            const latlngs = coordinates.map(function(coord) {
+                return [coord[1], coord[0]];
+            });
+
+            drawnItems.addLayer(L.polyline(latlngs));
+        };
+
+        if (geometry.type === "LineString") {
+
+            addLine(geometry.coordinates);
+
+        } else if (geometry.type === "MultiLineString") {
+
+            geometry.coordinates.forEach(function(lineCoordinates) {
+                addLine(lineCoordinates);
+            });
+
+        } else {
+
+            throw new Error(
+                "不支援的線形類型：" +
+                String(geometry.type || "")
+            );
+        }
+
+        const summary = getLineSummary_();
+
+        if (summary.lineCount === 0) {
+            throw new Error("GeoJSON 中沒有有效線形");
+        }
+
+        lineGeoJSONInput.value =
+            typeof geojsonText === "string"
+                ? geojsonText
+                : JSON.stringify(geojsonText);
+
+        updateLineInformation();
+
+        lineStatus.textContent =
+            "✓ 已載入原工程線形，" +
+            summary.lineCount +
+            " 段，" +
+            summary.totalPoints +
+            " 個節點，概略總長度 " +
+            formatLineLength(summary.totalLength) +
+            "；可按「繪製工程線形」進行修改。";
+
+        clearLineButton.disabled = false;
+
+        setTimeout(function() {
+            lineMap.invalidateSize();
+
+            if (drawnItems.getLayers().length > 0) {
+                lineMap.fitBounds(
+                    drawnItems.getBounds(),
+                    {
+                        padding: [50, 50]
+                    }
+                );
+            }
+        }, 100);
+
+        return true;
+
+    } catch (error) {
+
+        console.error("讀取原工程線形失敗", error);
+        resetLineStateSilently();
+        return false;
+    }
+}
+
+
+openLineMapButton.addEventListener("click", openLineMap);
+
+closeLineMapButton.addEventListener("click", function() {
+    lineMapModal.classList.remove("show");
+});
+
+cancelLineMapButton.addEventListener("click", function() {
+    lineMapModal.classList.remove("show");
+});
+
+confirmLineMapButton.addEventListener("click", confirmLineMap);
+clearLineButton.addEventListener("click", clearLine);
+
+
         // -------------------------
         // 頁籤
         // -------------------------
@@ -686,6 +2006,12 @@
 
                 if (targetPage === "businessDataPage") {
                     loadBusinessData();
+
+                    setTimeout(function() {
+                        if (overviewLineMap) {
+                            overviewLineMap.invalidateSize();
+                        }
+                    }, 150);
                 }
             });
         });
@@ -693,13 +2019,13 @@
         // -------------------------
         // D=A+B+C 自動計算
         // -------------------------
-        const budget115 = document.getElementById("budget115");
         const budget116 = document.getElementById("budget116");
         const budget117 = document.getElementById("budget117");
+        const budget118 = document.getElementById("budget118");
         const totalFunding = document.getElementById("totalFunding");
 
         function updateTotalFunding() {
-            const raw = [budget115.value, budget116.value, budget117.value];
+            const raw = [budget116.value, budget117.value, budget118.value];
 
             if (raw.every(v => v === "")) {
                 totalFunding.value = "";
@@ -710,37 +2036,441 @@
             totalFunding.value = total;
         }
 
-        [budget115, budget116, budget117].forEach(el => {
+        [budget116, budget117, budget118].forEach(el => {
             el.addEventListener("input", updateTotalFunding);
         });
 
         // -------------------------
-        // 儲存
+        // 新增 / 修改 / 刪除案件管理
         // -------------------------
         let formSubmitted = false;
+        let lastSubmittedOperation = "create";
+        let deleteSubmitted = false;
+        let caseManagerRows = [];
+        let currentEditingCaseId = "";
+
         const businessForm = document.getElementById("businessForm");
         const hiddenFrame = document.getElementById("hiddenFrame");
         const saveMessage = document.getElementById("saveMessage");
+        const caseIdInput = document.getElementById("caseId");
+        const operationInput = document.getElementById("operation");
+        const saveCaseButton = document.getElementById("saveCaseButton");
+        const cancelEditButton = document.getElementById("cancelEditButton");
+        const editModeStatus = document.getElementById("editModeStatus");
+        const newCaseButton = document.getElementById("newCaseButton");
+        const showCaseManagerButton = document.getElementById("showCaseManagerButton");
+        const reloadCaseManagerButton = document.getElementById("reloadCaseManagerButton");
+        const caseManagerPanel = document.getElementById("caseManagerPanel");
+        const caseManagerStatus = document.getElementById("caseManagerStatus");
+        const caseManagerBody = document.getElementById("caseManagerBody");
+        const deleteCaseForm = document.getElementById("deleteCaseForm");
+        const deleteCaseIdInput = document.getElementById("deleteCaseId");
+        const deleteFrame = document.getElementById("deleteFrame");
 
-        businessForm.addEventListener("submit", function () {
+
+        function setFieldValue(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.value = value === undefined || value === null ? "" : value;
+            }
+        }
+
+
+        function dateForInput(value) {
+            if (!value) return "";
+            const text = String(value).trim();
+            const match = text.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+            if (!match) return text;
+            return match[1] + "-" + match[2].padStart(2, "0") + "-" + match[3].padStart(2, "0");
+        }
+
+
+        function getDivisionIdByName(name) {
+            return Object.keys(divisions).find(function(id) {
+                return divisions[id].name === name;
+            }) || "";
+        }
+
+
+        function resetCoordinateStateSilently() {
+            coordinateInput.value = "";
+            selectedLat = null;
+            selectedLng = null;
+            selectedCoordinateText.textContent = "尚未選取";
+            confirmCoordinateButton.disabled = true;
+
+            if (coordinateMap && coordinateMarker) {
+                coordinateMap.removeLayer(coordinateMarker);
+                coordinateMarker = null;
+            }
+        }
+
+
+        function resetCaseFormForCreate() {
+
+            businessForm.reset();
+            operationInput.value = "create";
+            caseIdInput.value = "";
+            lineChangedInput.value = "0";
+            currentEditingCaseId = "";
+
+            syncDivisionToForm();
+            updateCountyOptions(divisionSelect.value);
+            updateRiverSystemOptions(divisionSelect.value);
+            resetCoordinateStateSilently();
+            resetLineStateSilently();
+
+            saveCaseButton.textContent = "儲存資料";
+            cancelEditButton.style.display = "none";
+            editModeStatus.textContent = "";
+            saveMessage.textContent = "";
+
+            caseManagerPanel.classList.remove("show");
+            businessForm.style.display = "block";
+            newCaseButton.classList.add("active-mode");
+            showCaseManagerButton.classList.remove("active-mode");
+            updateTotalFunding();
+        }
+
+
+        function showCaseManager() {
+
+            const divisionId = divisionSelect.value;
+
+            if (!divisionId || !divisions[divisionId]) {
+                alert("請先從頁面上方選擇河川分署。");
+                return;
+            }
+
+            businessForm.style.display = "none";
+            caseManagerPanel.classList.add("show");
+            newCaseButton.classList.remove("active-mode");
+            showCaseManagerButton.classList.add("active-mode");
+            editModeStatus.textContent = "";
+            loadCaseManagerData();
+        }
+
+
+        function loadCaseManagerData() {
+
+            const divisionId = divisionSelect.value;
+
+            if (!divisionId || !divisions[divisionId]) {
+                caseManagerStatus.textContent = "請先選擇河川分署。";
+                caseManagerBody.innerHTML = "";
+                return;
+            }
+
+            const selectedDivision = divisions[divisionId].name;
+            caseManagerStatus.textContent = selectedDivision + "案件載入中...";
+            caseManagerBody.innerHTML = "";
+
+            const oldScript = document.getElementById("caseManagerJsonp");
+            if (oldScript) oldScript.remove();
+
+            const script = document.createElement("script");
+            script.id = "caseManagerJsonp";
+            script.src =
+                GAS_URL +
+                "?action=read" +
+                "&division=" + encodeURIComponent(selectedDivision) +
+                "&callback=handleCaseManagerData" +
+                "&_=" + Date.now();
+
+            script.onerror = function() {
+                caseManagerStatus.textContent = "案件讀取失敗，請確認網路問題。";
+            };
+
+            document.body.appendChild(script);
+        }
+
+
+        function handleCaseManagerData(response) {
+
+            if (!response || response.success !== true) {
+                caseManagerRows = [];
+                caseManagerBody.innerHTML = "";
+                caseManagerStatus.textContent =
+                    "案件讀取失敗：" +
+                    (response && response.message ? response.message : "未知錯誤");
+                return;
+            }
+
+            caseManagerRows = Array.isArray(response.data) ? response.data : [];
+            caseManagerBody.innerHTML = "";
+
+            if (caseManagerRows.length === 0) {
+                caseManagerStatus.textContent = "目前尚無已提報案件。";
+                return;
+            }
+
+            caseManagerRows.forEach(function(row, index) {
+
+                const tr = document.createElement("tr");
+                const values = [
+                    index + 1,
+                    row[7] || "",
+                    row[3] || "",
+                    row[4] || "",
+                    row[5] || "",
+                    row[6] || ""
+                ];
+
+                values.forEach(function(value) {
+                    const td = document.createElement("td");
+                    td.textContent = value;
+                    tr.appendChild(td);
+                });
+
+                const actionTd = document.createElement("td");
+                actionTd.className = "case-action-buttons";
+
+                const editButton = document.createElement("button");
+                editButton.type = "button";
+                editButton.className = "case-edit-button";
+                editButton.textContent = "✏️ 修改";
+                editButton.addEventListener("click", function() {
+                    editExistingCase(index);
+                });
+
+                const deleteButton = document.createElement("button");
+                deleteButton.type = "button";
+                deleteButton.className = "case-delete-button";
+                deleteButton.textContent = "🗑 刪除";
+                deleteButton.addEventListener("click", function() {
+                    deleteExistingCase(index);
+                });
+
+                actionTd.appendChild(editButton);
+                actionTd.appendChild(deleteButton);
+                tr.appendChild(actionTd);
+                caseManagerBody.appendChild(tr);
+            });
+
+            caseManagerStatus.textContent = "目前共有 " + caseManagerRows.length + " 筆案件。";
+        }
+
+
+        function editExistingCase(index) {
+
+            const row = caseManagerRows[index];
+            if (!row) return;
+
+            const caseId = row[36] || "";
+            if (!caseId) {
+                alert("此案件尚未取得系統案件ID，請重新載入案件後再試一次。");
+                return;
+            }
+
+            currentEditingCaseId = caseId;
+            caseIdInput.value = caseId;
+            operationInput.value = "update";
+            lineChangedInput.value = "0";
+
+            const divisionId = getDivisionIdByName(row[2]);
+            if (divisionId) {
+                divisionSelect.value = divisionId;
+            }
+
+            syncDivisionToForm();
+            updateCountyOptions(divisionSelect.value);
+            countySelect.value = row[3] || "";
+            countySelect.dispatchEvent(new Event("change"));
+            townshipSelect.value = row[4] || "";
+
+            updateRiverSystemOptions(divisionSelect.value);
+            riverSystemSelect.value = row[5] || "";
+            updateCreekOptions(row[5] || "");
+            creekSelect.value = row[6] || "";
+
+            setFieldValue("category", row[1]);
+            setFieldValue("caseName", row[7]);
+            setFieldValue("structureName", row[8]);
+            setFieldValue("leveeLength", row[9]);
+            setFieldValue("revetmentLength", row[10]);
+            setFieldValue("otherWork", row[11]);
+            setFieldValue("protectedArea", row[12]);
+            setFieldValue("protectedPopulation", row[13]);
+            setFieldValue("ecoLandscapeLength", row[14]);
+            setFieldValue("envImprovementArea", row[15]);
+            setFieldValue("ecologyCheck", row[16]);
+            setFieldValue("hydroScore", row[17]);
+            setFieldValue("coordinate", row[18]);
+            setFieldValue("landStatus", row[19]);
+            setFieldValue("landAcquisitionCost", row[20]);
+            setFieldValue("marketValuationSubmitted", row[21]);
+            setFieldValue("plannedStart", dateForInput(row[22]));
+            setFieldValue("plannedFinish", dateForInput(row[23]));
+            setFieldValue("plannedDuration", row[24]);
+            setFieldValue("budget116", row[25]);
+            setFieldValue("budget117", row[26]);
+            setFieldValue("budget118", row[27]);
+            setFieldValue("estimatedCarbon", row[29]);
+            setFieldValue("remarks", row[35]);
+            updateTotalFunding();
+
+            // 將原代表座標同步到地圖選點狀態
+            const coordinateText = String(row[18] || "");
+            const parts = coordinateText.split(",").map(function(v) { return Number(v.trim()); });
+            if (parts.length === 2 && Number.isFinite(parts[0]) && Number.isFinite(parts[1])) {
+                selectedLng = parts[0];
+                selectedLat = parts[1];
+                selectedCoordinateText.textContent = selectedLng.toFixed(6) + ", " + selectedLat.toFixed(6);
+                confirmCoordinateButton.disabled = false;
+            } else {
+                selectedLng = null;
+                selectedLat = null;
+            }
+
+            resetLineStateSilently();
+            lineChangedInput.value = "0";
+            loadLineForEdit(row);
+
+            businessForm.style.display = "block";
+            caseManagerPanel.classList.remove("show");
+            saveCaseButton.textContent = "儲存修改";
+            cancelEditButton.style.display = "inline-block";
+            editModeStatus.textContent = "正在修改：" + (row[7] || "未命名案件");
+            newCaseButton.classList.remove("active-mode");
+            showCaseManagerButton.classList.remove("active-mode");
+            saveMessage.textContent = "";
+            window.scrollTo({ top: document.getElementById("dataEntryPage").offsetTop, behavior: "smooth" });
+        }
+
+
+        function loadLineForEdit(row) {
+
+            const oldScript = document.getElementById("editLineJsonp");
+            if (oldScript) oldScript.remove();
+
+            const script = document.createElement("script");
+            script.id = "editLineJsonp";
+            script.src =
+                GAS_URL +
+                "?action=readLine" +
+                "&caseId=" + encodeURIComponent(row[36] || "") +
+                "&division=" + encodeURIComponent(row[2] || "") +
+                "&county=" + encodeURIComponent(row[3] || "") +
+                "&township=" + encodeURIComponent(row[4] || "") +
+                "&riverSystem=" + encodeURIComponent(row[5] || "") +
+                "&creek=" + encodeURIComponent(row[6] || "") +
+                "&caseName=" + encodeURIComponent(row[7] || "") +
+                "&callback=handleEditLineData" +
+                "&_=" + Date.now();
+
+            document.body.appendChild(script);
+        }
+
+
+        function handleEditLineData(response) {
+
+            // 編輯資料載入只是讀取，不算使用者修改線形。
+            lineChangedInput.value = "0";
+
+            if (
+                response &&
+                response.success === true &&
+                response.data &&
+                response.data.geojson
+            ) {
+                restoreLineFromGeoJSON(response.data.geojson);
+                lineChangedInput.value = "0";
+            } else {
+                resetLineStateSilently();
+                lineChangedInput.value = "0";
+            }
+        }
+
+
+        function deleteExistingCase(index) {
+
+            const row = caseManagerRows[index];
+            if (!row) return;
+
+            const caseId = row[36] || "";
+            const caseName = row[7] || "未命名案件";
+
+            if (!caseId) {
+                alert("此案件缺少案件ID，請重新載入後再試一次。");
+                return;
+            }
+
+            const ok = confirm(
+                "確定要刪除「" + caseName + "」嗎？\n\n" +
+                "案件會從正式附表與線形資料中移除，但系統會先備份到 Google Sheet 的「刪除紀錄」工作表。"
+            );
+
+            if (!ok) return;
+
+            deleteCaseIdInput.value = caseId;
+            deleteSubmitted = true;
+            caseManagerStatus.textContent = "正在刪除「" + caseName + "」...";
+            deleteCaseForm.submit();
+        }
+
+
+        businessForm.addEventListener("submit", function (event) {
+
+            if (!divisionSelect.value) {
+                event.preventDefault();
+                alert("請先從頁面上方選擇河川分署。");
+                return;
+            }
+
             syncDivisionToForm();
             updateTotalFunding();
+            lastSubmittedOperation = operationInput.value || "create";
             formSubmitted = true;
-            saveMessage.textContent = "資料儲存中...";
+            saveMessage.textContent =
+                lastSubmittedOperation === "update"
+                    ? "資料修改中..."
+                    : "資料儲存中...";
         });
 
+
         hiddenFrame.addEventListener("load", function () {
+
             if (!formSubmitted) return;
 
             formSubmitted = false;
-            saveMessage.textContent = "✓ 資料已送出。";
 
-            businessForm.reset();
-            syncDivisionToForm();
-            updateTotalFunding();
+            if (lastSubmittedOperation === "update") {
+                saveMessage.textContent = "✓ 修改已送出。";
+                setTimeout(function() {
+                    resetCaseFormForCreate();
+                    showCaseManager();
+                    loadBusinessData();
+                }, 800);
+            } else {
+                saveMessage.textContent = "✓ 資料已送出。";
+                setTimeout(function() {
+                    resetCaseFormForCreate();
+                    loadBusinessData();
+                }, 500);
+            }
+        });
 
-            // 重新讀取 Google Sheet，讓「提報內容」立即看到新資料
-            setTimeout(loadBusinessData, 900);
+
+        deleteFrame.addEventListener("load", function() {
+
+            if (!deleteSubmitted) return;
+            deleteSubmitted = false;
+
+            caseManagerStatus.textContent = "✓ 刪除作業已送出，正在重新載入...";
+
+            setTimeout(function() {
+                loadCaseManagerData();
+                loadBusinessData();
+            }, 800);
+        });
+
+
+        newCaseButton.addEventListener("click", resetCaseFormForCreate);
+        showCaseManagerButton.addEventListener("click", showCaseManager);
+        reloadCaseManagerButton.addEventListener("click", loadCaseManagerData);
+        cancelEditButton.addEventListener("click", function() {
+            resetCaseFormForCreate();
+            showCaseManager();
         });
 
         // -------------------------
@@ -751,35 +2481,117 @@
         const refreshDataButton = document.getElementById("refreshDataButton");
         let dataLoadTimer = null;
 
-        function loadBusinessData() {
-            dataStatus.textContent = "資料載入中...";
-            businessDataBody.innerHTML =
-                '<tr><td colspan="31" class="empty-row">資料載入中...</td></tr>';
+function loadBusinessData() {
 
-            const oldScript = document.getElementById("businessDataJsonp");
-            if (oldScript) oldScript.remove();
+    const divisionId = divisionSelect.value;
 
-            const script = document.createElement("script");
-            script.id = "businessDataJsonp";
-            script.src =
-                GAS_URL +
-                "?action=read&callback=handleBusinessData&_=" +
-                Date.now();
+    // 尚未選擇河川分署
+    if (!divisionId || !divisions[divisionId]) {
 
-            script.onerror = function () {
-                clearTimeout(dataLoadTimer);
-                dataStatus.textContent = "資料讀取失敗，請確認 Apps Script 已更新部署。";
-                businessDataBody.innerHTML =
-                    '<tr><td colspan="31" class="empty-row">無法讀取 Google Sheet 資料</td></tr>';
-            };
+        dataStatus.textContent =
+            "請先從頁面上方選擇河川分署";
 
-            document.body.appendChild(script);
+        businessDataBody.innerHTML = "";
 
-            clearTimeout(dataLoadTimer);
-            dataLoadTimer = setTimeout(function () {
-                dataStatus.textContent = "資料讀取逾時，請確認 Apps Script 的部署設定。";
-            }, 10000);
+        const contentDashboard =
+            document.getElementById("contentDashboard");
+
+        const entryDashboard =
+            document.getElementById("entryDashboard");
+
+        if (contentDashboard) {
+            contentDashboard.innerHTML = "";
         }
+
+        if (entryDashboard) {
+            entryDashboard.innerHTML = "";
+        }
+
+        return;
+    }
+
+
+    const selectedDivision =
+        divisions[divisionId].name;
+
+
+    dataStatus.textContent =
+        selectedDivision + "資料載入中...";
+
+    businessDataBody.innerHTML = "";
+
+
+    const oldScript =
+        document.getElementById(
+            "businessDataJsonp"
+        );
+
+    if (oldScript) {
+        oldScript.remove();
+    }
+
+
+    const script =
+        document.createElement("script");
+
+    script.id =
+        "businessDataJsonp";
+
+
+    script.src =
+        GAS_URL +
+        "?action=read" +
+        "&division=" +
+        encodeURIComponent(selectedDivision) +
+        "&callback=handleBusinessData" +
+        "&_=" +
+        Date.now();
+
+
+    script.onerror = function () {
+
+        clearTimeout(dataLoadTimer);
+
+        dataStatus.textContent =
+            "資料讀取失敗，請確認網路問題。";
+
+        businessDataBody.innerHTML = "";
+
+        const contentDashboard =
+            document.getElementById("contentDashboard");
+
+        const entryDashboard =
+            document.getElementById("entryDashboard");
+
+        if (contentDashboard) {
+            contentDashboard.innerHTML = "";
+        }
+
+        if (entryDashboard) {
+            entryDashboard.innerHTML = "";
+        }
+
+    };
+
+
+    document.body.appendChild(
+        script
+    );
+
+
+    clearTimeout(
+        dataLoadTimer
+    );
+
+
+    dataLoadTimer =
+        setTimeout(function () {
+
+            dataStatus.textContent =
+                "資料讀取逾時，請確認網路問題。";
+
+        }, 10000);
+}
 
         function handleBusinessData(response) {
             clearTimeout(dataLoadTimer);
@@ -792,7 +2604,26 @@
                 return;
             }
 
-            const rows = Array.isArray(response.data) ? response.data : [];
+            const rows =
+                Array.isArray(response.data)
+                    ? response.data
+                    : [];
+
+            renderAppendix1Dashboard(
+                rows,
+                "contentDashboard"
+            );
+
+            // 只有在「提報內容」頁面可見時才載入總覽地圖。
+            if (
+                document
+                    .getElementById("businessDataPage")
+                    .classList
+                    .contains("active")
+            ) {
+                loadOverviewLineMap();
+            }
+
             businessDataBody.innerHTML = "";
 
             if (rows.length === 0) {
@@ -801,32 +2632,814 @@
                 return;
             }
 
-            rows.forEach(function (rowData) {
-                const tr = document.createElement("tr");
+rows.forEach(function (rowData, rowIndex) {
 
-for (let i = 0; i < 36; i++) {
+    const tr = document.createElement("tr");
 
-    // Google Sheet AE～AI
-    // 為「河海組初擬意見」，網頁不顯示
-    if (i >= 30 && i <= 34) {
-        continue;
+    for (let i = 0; i < 36; i++) {
+
+        // 河海組初擬意見不顯示
+        if (i >= 30 && i <= 34) {
+            continue;
+        }
+
+        const td = document.createElement("td");
+
+        // 項次不要直接使用 Google Sheet A欄
+        // 改成依目前分署查詢結果重新編號
+        if (i === 0) {
+
+            td.textContent = rowIndex + 1;
+
+        } else if (i === 7) {
+
+            // H欄「案件名稱」：
+            // 正式表格欄位不增加，只在 index 畫面中
+            // 把「查看線形」按鈕放在案件名稱右側。
+            const caseName =
+                rowData &&
+                rowData[i] !== undefined &&
+                rowData[i] !== null
+                    ? String(rowData[i])
+                    : "";
+
+            const wrap =
+                document.createElement("div");
+
+            wrap.className =
+                "case-name-line-wrap";
+
+
+            const nameSpan =
+                document.createElement("span");
+
+            nameSpan.className =
+                "case-name-text";
+
+            nameSpan.textContent =
+                caseName;
+
+            wrap.appendChild(
+                nameSpan
+            );
+
+
+            const caseId =
+                rowData[36]
+                    ? String(rowData[36]).trim()
+                    : "";
+
+            if (caseId !== "") {
+
+                const lineButton =
+                    document.createElement("button");
+
+                lineButton.type =
+                    "button";
+
+                lineButton.className =
+                    "view-line-button";
+
+                lineButton.textContent =
+                    "🔎 查看線形";
+
+
+                lineButton.addEventListener(
+                    "click",
+                    function() {
+
+                        openViewLineMap({
+                            caseId: rowData[36] || "",
+                            division: rowData[2] || "",
+                            county: rowData[3] || "",
+                            township: rowData[4] || "",
+                            riverSystem: rowData[5] || "",
+                            creek: rowData[6] || "",
+                            caseName: rowData[7] || ""
+                        });
+
+                    }
+                );
+
+
+                wrap.appendChild(
+                    lineButton
+                );
+
+            }
+
+
+            td.appendChild(
+                wrap
+            );
+
+        } else {
+
+            td.textContent =
+                rowData &&
+                rowData[i] !== undefined &&
+                rowData[i] !== null
+                    ? rowData[i]
+                    : "";
+
+        }
+
+        tr.appendChild(td);
     }
 
-    const td = document.createElement("td");
+    businessDataBody.appendChild(tr);
+});
 
-    td.textContent =
-        rowData && rowData[i] !== undefined && rowData[i] !== null
-            ? rowData[i]
-            : "";
 
-    tr.appendChild(td);
+const divisionName =
+    divisions[divisionSelect.value]
+        ? divisions[divisionSelect.value].name
+        : "";
+
+const validRowsForStatus =
+    getValidAppendix1Rows(rows);
+
+const incompleteCount =
+    rows.length -
+    validRowsForStatus.length;
+
+dataStatus.textContent =
+    divisionName +
+    "目前共有 " +
+    validRowsForStatus.length +
+    " 筆完整提報案件" +
+    (
+        incompleteCount > 0
+            ? "（另有 " +
+              incompleteCount +
+              " 筆未完整填列資料）"
+            : ""
+    );
+        }
+
+
+// =====================================================
+// 提報內容：提報工程位置總覽地圖
+// =====================================================
+
+const overviewLineMapStatus =
+    document.getElementById("overviewLineMapStatus");
+
+let overviewLineMap = null;
+let overviewLineGroup = null;
+
+
+/**
+ * 建立提報內容右側的提報工程位置總覽地圖。
+ */
+function initializeOverviewLineMap() {
+
+    if (overviewLineMap) {
+        return;
+    }
+
+    overviewLineMap =
+        L.map("overviewLineMap")
+        .setView(
+            [23.7, 120.9],
+            7
+        );
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            attribution:
+                "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(
+        overviewLineMap
+    );
+
+    overviewLineGroup =
+        L.featureGroup()
+        .addTo(
+            overviewLineMap
+        );
 }
 
-                businessDataBody.appendChild(tr);
-            });
 
-            dataStatus.textContent = "目前共有 " + rows.length + " 筆資料";
+/**
+ * 讀取目前所選河川分署的全部工程線形。
+ * 使用 Apps Script 的 action=readLines，一次取得，不逐案發送請求。
+ */
+function loadOverviewLineMap() {
+
+    const divisionId =
+        divisionSelect.value;
+
+    if (
+        !divisionId ||
+        !divisions[divisionId]
+    ) {
+
+        if (overviewLineMapStatus) {
+            overviewLineMapStatus.textContent =
+                "請先選擇河川分署";
         }
+
+        return;
+    }
+
+
+    initializeOverviewLineMap();
+
+
+    const selectedDivision =
+        divisions[divisionId].name;
+
+
+    overviewLineMapStatus.textContent =
+        selectedDivision +
+        "工程線形載入中...";
+
+
+    if (overviewLineGroup) {
+        overviewLineGroup.clearLayers();
+    }
+
+
+    // Leaflet 地圖位於頁籤內，顯示後重新計算尺寸。
+    setTimeout(function() {
+
+        overviewLineMap.invalidateSize();
+
+        overviewLineMap.setView(
+            [
+                divisions[divisionId].lat,
+                divisions[divisionId].lng
+            ],
+            divisions[divisionId].zoom || 9
+        );
+
+    }, 100);
+
+
+    const oldScript =
+        document.getElementById(
+            "overviewLinesJsonp"
+        );
+
+    if (oldScript) {
+        oldScript.remove();
+    }
+
+
+    const script =
+        document.createElement(
+            "script"
+        );
+
+    script.id =
+        "overviewLinesJsonp";
+
+    script.src =
+        GAS_URL +
+        "?action=readLines" +
+        "&division=" +
+        encodeURIComponent(
+            selectedDivision
+        ) +
+        "&callback=handleOverviewLineData" +
+        "&_=" +
+        Date.now();
+
+
+    script.onerror =
+        function() {
+
+            overviewLineMapStatus.textContent =
+                "提報工程位置總覽讀取失敗，請確認網路問題。";
+
+        };
+
+
+    document.body.appendChild(
+        script
+    );
+}
+
+
+/**
+ * 防止案件名稱等文字直接插入 popup HTML。
+ */
+function escapeOverviewHtml_(value) {
+
+    return String(
+        value === undefined ||
+        value === null
+            ? ""
+            : value
+    )
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+/**
+ * 接收目前分署全部線形並一次畫在右側地圖。
+ */
+function handleOverviewLineData(response) {
+
+    if (
+        !response ||
+        response.success !== true
+    ) {
+
+        overviewLineMapStatus.textContent =
+            response &&
+            response.message
+                ? response.message
+                : "無法載入提報工程位置總覽";
+
+        return;
+    }
+
+
+    initializeOverviewLineMap();
+    overviewLineGroup.clearLayers();
+
+
+    const records =
+        Array.isArray(response.data)
+            ? response.data
+            : [];
+
+
+    let caseCount = 0;
+    let lineCount = 0;
+
+
+    records.forEach(
+        function(record) {
+
+            if (
+                !record ||
+                !record.geojson
+            ) {
+                return;
+            }
+
+
+            let geojson;
+
+            try {
+
+                geojson =
+                    typeof record.geojson === "string"
+                        ? JSON.parse(
+                            record.geojson
+                        )
+                        : record.geojson;
+
+            } catch (error) {
+
+                console.warn(
+                    "略過無法解析的工程線形：",
+                    record.caseName,
+                    error
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const layer =
+                    L.geoJSON(
+                        geojson
+                    );
+
+
+                const geometry =
+                    geojson &&
+                    geojson.type === "Feature"
+                        ? geojson.geometry
+                        : geojson;
+
+
+                if (
+                    geometry &&
+                    geometry.type === "MultiLineString" &&
+                    Array.isArray(
+                        geometry.coordinates
+                    )
+                ) {
+
+                    lineCount +=
+                        geometry.coordinates.length;
+
+                } else if (
+                    geometry &&
+                    geometry.type === "LineString"
+                ) {
+
+                    lineCount += 1;
+
+                }
+
+
+                caseCount++;
+
+
+                const popupHtml =
+                    '<div class="overview-line-popup-title">' +
+                    escapeOverviewHtml_(
+                        record.caseName ||
+                        "未命名案件"
+                    ) +
+                    '</div>' +
+                    '<div class="overview-line-popup-meta">' +
+                    escapeOverviewHtml_(
+                        [
+                            record.riverSystem,
+                            record.creek
+                        ]
+                        .filter(Boolean)
+                        .join("｜")
+                    ) +
+                    '</div>';
+
+
+                layer.bindPopup(
+                    popupHtml
+                );
+
+
+                layer.addTo(
+                    overviewLineGroup
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "略過無法顯示的工程線形：",
+                    record.caseName,
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    setTimeout(function() {
+
+        overviewLineMap.invalidateSize();
+
+
+        const bounds =
+            overviewLineGroup.getBounds();
+
+
+        if (
+            bounds &&
+            bounds.isValid()
+        ) {
+
+            overviewLineMap.fitBounds(
+                bounds,
+                {
+                    padding:
+                        [35, 35],
+                    maxZoom:
+                        15
+                }
+            );
+
+        }
+
+    }, 80);
+
+
+    if (caseCount === 0) {
+
+        overviewLineMapStatus.textContent =
+            "目前所選分署尚無工程線形資料";
+
+        return;
+    }
+
+
+    overviewLineMapStatus.textContent =
+        "已顯示 " +
+        caseCount +
+        " 件工程、共 " +
+        lineCount +
+        " 段工程線形；點選線形可查看提報工程名稱。";
+}
+
+
+// =====================================================
+// 提報內容：查看工程線形（只讀）
+// =====================================================
+
+const viewLineModal =
+    document.getElementById("viewLineModal");
+
+const viewLineTitle =
+    document.getElementById("viewLineTitle");
+
+const viewLineInfo =
+    document.getElementById("viewLineInfo");
+
+const viewLineStatus =
+    document.getElementById("viewLineStatus");
+
+const closeViewLineMapButton =
+    document.getElementById("closeViewLineMap");
+
+const closeViewLineMapBottomButton =
+    document.getElementById("closeViewLineMapBottom");
+
+
+let viewLineMap = null;
+let viewLineLayer = null;
+
+
+function initializeViewLineMap() {
+
+    if (viewLineMap) {
+        return;
+    }
+
+    viewLineMap =
+        L.map("viewLineMap")
+        .setView(
+            [23.7, 120.9],
+            7
+        );
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            attribution:
+                "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(
+        viewLineMap
+    );
+
+}
+
+
+function openViewLineMap(caseData) {
+
+    initializeViewLineMap();
+
+    viewLineTitle.textContent =
+        (caseData.caseName || "未命名案件") +
+        "－工程線形";
+
+    viewLineInfo.textContent =
+        [
+            caseData.division,
+            caseData.county,
+            caseData.township,
+            caseData.riverSystem,
+            caseData.creek
+        ]
+        .filter(function(value) {
+            return value;
+        })
+        .join("｜");
+
+    viewLineStatus.textContent =
+        "線形資料載入中...";
+
+    // 先移除上一個案件的線形，避免載入失敗時仍看到舊線
+    if (viewLineLayer) {
+
+        viewLineMap.removeLayer(
+            viewLineLayer
+        );
+
+        viewLineLayer = null;
+    }
+
+    viewLineModal.classList.add(
+        "show"
+    );
+
+    setTimeout(function() {
+
+        viewLineMap.invalidateSize();
+
+        const divisionId =
+            getDivisionIdByName(
+                caseData.division
+            );
+
+        if (
+            divisionId &&
+            divisions[divisionId]
+        ) {
+
+            viewLineMap.setView(
+                [
+                    divisions[divisionId].lat,
+                    divisions[divisionId].lng
+                ],
+                divisions[divisionId].zoom || 9
+            );
+
+        } else {
+
+            viewLineMap.setView(
+                [23.7, 120.9],
+                7
+            );
+
+        }
+
+    }, 120);
+
+
+    const oldScript =
+        document.getElementById(
+            "viewLineJsonp"
+        );
+
+    if (oldScript) {
+        oldScript.remove();
+    }
+
+
+    const script =
+        document.createElement(
+            "script"
+        );
+
+    script.id =
+        "viewLineJsonp";
+
+    script.src =
+        GAS_URL +
+        "?action=readLine" +
+        "&caseId=" +
+        encodeURIComponent(
+            caseData.caseId || ""
+        ) +
+        "&division=" +
+        encodeURIComponent(
+            caseData.division || ""
+        ) +
+        "&county=" +
+        encodeURIComponent(
+            caseData.county || ""
+        ) +
+        "&township=" +
+        encodeURIComponent(
+            caseData.township || ""
+        ) +
+        "&riverSystem=" +
+        encodeURIComponent(
+            caseData.riverSystem || ""
+        ) +
+        "&creek=" +
+        encodeURIComponent(
+            caseData.creek || ""
+        ) +
+        "&caseName=" +
+        encodeURIComponent(
+            caseData.caseName || ""
+        ) +
+        "&callback=handleViewLineData" +
+        "&_=" +
+        Date.now();
+
+    script.onerror =
+        function() {
+
+            viewLineStatus.textContent =
+                "線形資料讀取失敗，請確認網路。";
+
+        };
+
+    document.body.appendChild(
+        script
+    );
+
+}
+
+
+function handleViewLineData(response) {
+
+    if (
+        !response ||
+        response.success !== true ||
+        !response.data ||
+        !response.data.geojson
+    ) {
+        viewLineStatus.textContent =
+            response && response.message
+                ? response.message
+                : "此案件尚未繪製工程線形";
+        return;
+    }
+
+    let geojson;
+
+    try {
+        geojson =
+            typeof response.data.geojson === "string"
+                ? JSON.parse(response.data.geojson)
+                : response.data.geojson;
+    } catch (error) {
+        viewLineStatus.textContent = "工程線形 GeoJSON 格式錯誤。";
+        return;
+    }
+
+    try {
+
+        viewLineLayer = L.geoJSON(geojson).addTo(viewLineMap);
+
+        const bounds = viewLineLayer.getBounds();
+
+        if (bounds && bounds.isValid()) {
+            viewLineMap.fitBounds(
+                bounds,
+                {
+                    padding: [50, 50],
+                    maxZoom: 17
+                }
+            );
+        }
+
+        let lineCount = 0;
+        let totalPoints = 0;
+        let totalLength = 0;
+
+        viewLineLayer.eachLayer(function(layer) {
+
+            if (!layer || typeof layer.getLatLngs !== "function") {
+                return;
+            }
+
+            const parts = getLineParts_(layer.getLatLngs());
+
+            parts.forEach(function(latlngs) {
+
+                if (latlngs.length < 2) {
+                    return;
+                }
+
+                lineCount++;
+                totalPoints += latlngs.length;
+
+                for (let i = 1; i < latlngs.length; i++) {
+                    totalLength +=
+                        latlngs[i - 1].distanceTo(latlngs[i]);
+                }
+            });
+        });
+
+        viewLineStatus.textContent =
+            "✓ 工程線形已載入｜線形數：" +
+            lineCount +
+            " 段｜節點數：" +
+            totalPoints +
+            "｜概略總長度：" +
+            formatLineLength(totalLength);
+
+    } catch (error) {
+        viewLineStatus.textContent =
+            "工程線形顯示失敗：" +
+            error.message;
+    }
+}
+
+function closeViewLineMap() {
+
+    viewLineModal.classList.remove(
+        "show"
+    );
+
+}
+
+
+closeViewLineMapButton
+    .addEventListener(
+        "click",
+        closeViewLineMap
+    );
+
+
+closeViewLineMapBottomButton
+    .addEventListener(
+        "click",
+        closeViewLineMap
+    );
+
 
         refreshDataButton.addEventListener("click", loadBusinessData);
 
@@ -1033,8 +3646,6 @@ countySelect.addEventListener("change", function () {
     });
 
 });
-
-
 
 
 // =====================================================
@@ -1326,7 +3937,6 @@ function updateRiverSystemOptions(divisionId) {
 }
 
 
-
 // =====================================================
 // 依水系更新溪別
 // =====================================================
@@ -1392,6 +4002,24 @@ divisionSelect.addEventListener(
         updateRiverSystemOptions(
             this.value
         );
+
+        const businessDataPage =
+            document.getElementById(
+                "businessDataPage"
+            );
+
+        // 如果目前在「提報內容」或「工程提報」頁面，
+        // 切換分署時同步重新載入案件與儀表板。
+if (
+    businessDataPage.classList.contains("active")
+) {
+    loadBusinessData();
+}
+
+        // 若正在「已提報案件管理」，切換分署時同步重新載入。
+        if (caseManagerPanel && caseManagerPanel.classList.contains("show")) {
+            loadCaseManagerData();
+        }
 
     }
 );
@@ -1554,7 +4182,715 @@ function updateCountyOptions(divisionId) {
 }
 
 
+// =====================================================
+// 地圖選取座標
+// =====================================================
+
+const coordinateInput =
+    document.getElementById("coordinate");
+
+const coordinateModal =
+    document.getElementById("coordinateModal");
+
+const openCoordinateMapButton =
+    document.getElementById("openCoordinateMap");
+
+const closeCoordinateMapButton =
+    document.getElementById("closeCoordinateMap");
+
+const cancelCoordinateButton =
+    document.getElementById("cancelCoordinate");
+
+const confirmCoordinateButton =
+    document.getElementById("confirmCoordinate");
+
+const selectedCoordinateText =
+    document.getElementById("selectedCoordinate");
+
+
+let coordinateMap = null;
+
+let coordinateMarker = null;
+
+let selectedLat = null;
+
+let selectedLng = null;
+
+function openCoordinateMap() {
+
+    coordinateModal.classList.add("show");
+
+
+    // 第一次開啟時才建立選點地圖
+    if (!coordinateMap) {
+
+        coordinateMap =
+            L.map("coordinateMap")
+            .setView(
+                [23.7, 120.9],
+                7
+            );
+
+
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                attribution:
+                    "&copy; OpenStreetMap contributors"
+            }
+        ).addTo(coordinateMap);
+
+
+        // 使用者點選地圖
+        coordinateMap.on(
+            "click",
+            function(e) {
+
+                selectedLat =
+                    e.latlng.lat;
+
+                selectedLng =
+                    e.latlng.lng;
+
+
+                // 移除之前的標記
+                if (coordinateMarker) {
+
+                    coordinateMap.removeLayer(
+                        coordinateMarker
+                    );
+
+                }
+
+
+                // 新增目前選取位置
+                coordinateMarker =
+                    L.marker([
+                        selectedLat,
+                        selectedLng
+                    ])
+                    .addTo(coordinateMap);
+
+
+                // 顯示選取座標
+                selectedCoordinateText.textContent =
+                    selectedLng.toFixed(6) +
+                    ", " +
+                    selectedLat.toFixed(6);
+
+
+                // 啟用確定按鈕
+                confirmCoordinateButton.disabled =
+                    false;
+
+            }
+        );
+
+    }
+
+
+    // ==================================================
+    // 根據目前選擇的河川分署決定地圖開啟位置
+    // ==================================================
+
+    const divisionId =
+        divisionSelect.value;
+
+
+    setTimeout(function() {
+
+        // Leaflet 在隱藏視窗重新顯示時
+        // 需要重新計算地圖尺寸
+        coordinateMap.invalidateSize();
+
+
+        // 有選河川分署
+        if (
+            divisionId &&
+            divisions[divisionId]
+        ) {
+
+            const divisionData =
+                divisions[divisionId];
+
+
+            // 自動移到該河川分署附近
+            coordinateMap.setView(
+                [
+                    divisionData.lat,
+                    divisionData.lng
+                ],
+                9
+            );
+
+        } else {
+
+            // 尚未選河川分署
+            // 顯示全臺灣
+            coordinateMap.setView(
+                [23.7, 120.9],
+                7
+            );
+
+        }
+
+    }, 150);
+
+}
+
+function confirmCoordinate() {
+
+    if (
+        selectedLat === null ||
+        selectedLng === null
+    ) {
+        return;
+    }
+
+
+    coordinateInput.value =
+        selectedLng.toFixed(6) +
+        ", " +
+        selectedLat.toFixed(6);
+
+
+    coordinateModal
+        .classList.remove("show");
+
+}
+
+function closeCoordinateMap() {
+
+    coordinateModal
+        .classList.remove("show");
+
+}
+
+openCoordinateMapButton
+    .addEventListener(
+        "click",
+        openCoordinateMap
+    );
+
+
+confirmCoordinateButton
+    .addEventListener(
+        "click",
+        confirmCoordinate
+    );
+
+
+closeCoordinateMapButton
+    .addEventListener(
+        "click",
+        closeCoordinateMap
+    );
+
+
+cancelCoordinateButton
+    .addEventListener(
+        "click",
+        closeCoordinateMap
+    );
+
+const APPENDIX1_COLUMNS = {
+
+    category: 1,          // B 類別
+    division: 2,          // C 分署
+    county: 3,            // D 縣市
+    township: 4,          // E 鄉鎮市
+    riverSystem: 5,       // F 水系
+    creek: 6,             // G 溪別
+    caseName: 7,          // H 案件名稱
+
+    budget116: 25,        // Z
+    budget117: 26,        // AA
+    budget118: 27,        // AB
+
+    totalFunding: 28,     // AC 經費需求
+
+    carbon: 29,           // AD 預估碳排量
+
+    caseId: 36            // AK 系統案件ID
+
+};
+
+function parseSheetNumber(value) {
+
+    if (
+        value === undefined ||
+        value === null ||
+        String(value).trim() === ""
+    ) {
+        return 0;
+    }
+
+    const cleaned =
+        String(value)
+            .replace(/,/g, "")
+            .trim();
+
+    const number =
+        Number(cleaned);
+
+    return Number.isFinite(number)
+        ? number
+        : 0;
+}
+
+function formatDashboardNumber(value) {
+
+    return new Intl.NumberFormat(
+        "zh-TW"
+    ).format(value);
+
+}
+
+
+/**
+ * 判斷附表1是否為「有效工程案件」。
+ *
+ * 有效工程案件條件：
+ * B～AD 所有需要由提報人填列／產生的欄位都必須有值。
+ *
+ * 不列入判斷：
+ * A  項次：系統自動產生
+ * AE～AI：河海組初擬意見，非提報階段填列
+ * AJ 備註：允許空白
+ * AK 案件ID：系統自動產生
+ */
+function getValidAppendix1Rows(rows) {
+
+    if (!Array.isArray(rows)) {
+        return [];
+    }
+
+
+    // 必須填列的 Google Sheet 欄位索引
+    // 陣列索引從 0 開始：
+    //
+    // B = 1
+    // C = 2
+    // ...
+    // AD = 29
+    const requiredIndexes = [];
+
+    for (let i = 1; i <= 29; i++) {
+        requiredIndexes.push(i);
+    }
+
+
+    return rows.filter(function(row) {
+
+        if (!Array.isArray(row)) {
+            return false;
+        }
+
+
+        return requiredIndexes.every(function(index) {
+
+            const value =
+                row[index];
+
+
+            // undefined / null 視為未填
+            if (
+                value === undefined ||
+                value === null
+            ) {
+                return false;
+            }
+
+
+            // 空字串視為未填
+            // 但「0」是有效資料，不能當成空白
+            return (
+                String(value)
+                    .trim() !== ""
+            );
+
+        });
+
+    });
+}
+
+function countByColumn(
+    rows,
+    columnIndex
+) {
+
+    const result = {};
+
+    rows.forEach(
+        function(row) {
+
+            const value =
+                String(
+                    row[columnIndex] ||
+                    "未填列"
+                ).trim();
+
+            result[value] =
+                (result[value] || 0) +
+                1;
+
+        }
+    );
+
+    return result;
+}
+
+function createDashboardBars(
+    data,
+    title
+) {
+
+    const entries =
+        Object.entries(data)
+            .sort(
+                function(a, b) {
+                    return b[1] - a[1];
+                }
+            );
+
+
+    if (entries.length === 0) {
+
+        return `
+            <div class="dashboard-panel">
+                <div class="dashboard-panel-title">
+                    ${title}
+                </div>
+
+                <div class="dashboard-empty">
+                    尚無資料
+                </div>
+            </div>
+        `;
+
+    }
+
+
+    const maxValue =
+        Math.max(
+            ...entries.map(
+                item => item[1]
+            )
+        );
+
+
+    const rowsHtml =
+        entries.map(
+            function(item) {
+
+                const name =
+                    item[0];
+
+                const count =
+                    item[1];
+
+                const percent =
+                    maxValue > 0
+                        ? count /
+                          maxValue *
+                          100
+                        : 0;
+
+
+                return `
+                    <div class="dashboard-bar-row">
+
+                        <div
+                            class="dashboard-bar-label"
+                            title="${name}"
+                        >
+                            ${name}
+                        </div>
+
+                        <div class="dashboard-bar-track">
+
+                            <div
+                                class="dashboard-bar"
+                                style="width:${percent}%"
+                            >
+                            </div>
+
+                        </div>
+
+                        <div class="dashboard-bar-value">
+                            ${count} 件
+                        </div>
+
+                    </div>
+                `;
+
+            }
+        )
+        .join("");
+
+
+    return `
+        <div class="dashboard-panel">
+
+            <div class="dashboard-panel-title">
+                ${title}
+            </div>
+
+            ${rowsHtml}
+
+        </div>
+    `;
+
+}
+
+function renderAppendix1Dashboard(
+    rows,
+    containerId
+) {
+
+    const container =
+        document.getElementById(
+            containerId
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const validRows =
+        getValidAppendix1Rows(
+            rows
+        );
+
+
+    // -------------------------
+    // 件數
+    // -------------------------
+
+    const caseCount =
+        validRows.length;
+
+    // -------------------------
+    // 經費合計
+    // -------------------------
+
+    const totalFunding =
+        validRows.reduce(
+            function(sum, row) {
+
+                return (
+                    sum +
+                    parseSheetNumber(
+                        row[
+                            APPENDIX1_COLUMNS
+                                .totalFunding
+                        ]
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    // -------------------------
+    // 116年需求
+    // -------------------------
+
+    const budget116 =
+        validRows.reduce(
+            function(sum, row) {
+
+                return (
+                    sum +
+                    parseSheetNumber(
+                        row[
+                            APPENDIX1_COLUMNS
+                                .budget116
+                        ]
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    // -------------------------
+    // 水系數
+    // -------------------------
+
+    const riverSystems =
+        new Set(
+
+            validRows
+                .map(
+                    row =>
+                        row[
+                            APPENDIX1_COLUMNS
+                                .riverSystem
+                        ]
+                )
+                .filter(Boolean)
+
+        );
+
+
+// -------------------------
+// 案件類別分布
+// 固定顯示全部5種，即使某一類目前是0件
+// -------------------------
+
+const categoryDistribution = {
+    "工程": 0,
+    "用地先期": 0,
+    "用地取得": 0,
+    "委託測設監造": 0,
+    "橋梁改建": 0
+};
+
+
+validRows.forEach(function(row) {
+
+    const category =
+        String(
+            row[
+                APPENDIX1_COLUMNS.category
+            ] || ""
+        ).trim();
+
+
+    if (
+        Object.prototype.hasOwnProperty.call(
+            categoryDistribution,
+            category
+        )
+    ) {
+
+        categoryDistribution[category]++;
+
+    }
+
+});
+
+
+// -------------------------
+// 水系分布
+// -------------------------
+
+const riverDistribution =
+    countByColumn(
+        validRows,
+        APPENDIX1_COLUMNS.riverSystem
+    );
+
+
+// -------------------------
+// 縣市分布
+// -------------------------
+
+const countyDistribution =
+    countByColumn(
+        validRows,
+        APPENDIX1_COLUMNS.county
+    );
+
+
+    container.innerHTML = `
+
+        <div class="dashboard-cards">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-label">
+                    提報案件
+                </div>
+
+                <div class="dashboard-card-value">
+                    ${caseCount}
+                    <span class="dashboard-card-unit">
+                        件
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-label">
+                    經費需求合計
+                </div>
+
+                <div class="dashboard-card-value">
+                    ${
+                        formatDashboardNumber(
+                            totalFunding
+                        )
+                    }
+
+                    <span class="dashboard-card-unit">
+                        千元
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-label">
+                    116年度預估使用經費
+                </div>
+
+                <div class="dashboard-card-value">
+                    ${
+                        formatDashboardNumber(
+                            budget116
+                        )
+                    }
+
+                    <span class="dashboard-card-unit">
+                        千元
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+<div class="dashboard-breakdowns">
+
+    ${
+        createDashboardBars(
+            categoryDistribution,
+            "案件類別分布"
+        )
+    }
+
+    ${
+        createDashboardBars(
+            riverDistribution,
+            "水系分布"
+        )
+    }
+
+    ${
+        createDashboardBars(
+            countyDistribution,
+            "縣市分布"
+        )
+    }
+
+</div>
+    `;
+
+}
+
     </script>
+
 
 </body>
 </html>
