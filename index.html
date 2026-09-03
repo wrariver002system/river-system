@@ -408,6 +408,61 @@
     font-size: 14px;
 }
 
+.line-reference-toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 18px;
+    border-bottom: 1px solid #ddd;
+    background: #fafafa;
+}
+
+.line-reference-item {
+    display: grid;
+    grid-template-columns: minmax(310px, auto) minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+}
+
+@media (max-width: 760px) {
+    .line-reference-item {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+}
+
+.line-reference-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.line-reference-toggle input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.line-reference-status {
+    color: #666;
+    font-size: 13px;
+}
+
+.line-reference-status.loading {
+    color: #1565c0;
+}
+
+.line-reference-status.success {
+    color: #2e7d32;
+}
+
+.line-reference-status.error {
+    color: #c62828;
+}
+
 .close-map-button {
     border: none;
     background: transparent;
@@ -791,15 +846,36 @@
     color: #555;
 }
 
+#loginDivisionCode,
 #loginCode {
     width: 100%;
     padding: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     border: 1px solid #bbb;
     border-radius: 5px;
-    font-size: 22px;
+    font-size: 20px;
     text-align: center;
+    box-sizing: border-box;
+}
+
+#loginDivisionCode {
+    letter-spacing: 2px;
+}
+
+#loginCode {
     letter-spacing: 8px;
+}
+
+.login-hint {
+    margin: -4px 0 12px;
+    color: #777;
+    font-size: 13px;
+}
+
+#division:disabled {
+    background: #eeeeee;
+    color: #555;
+    cursor: not-allowed;
 }
 
 #loginButton {
@@ -883,9 +959,11 @@
         <div class="login-card">
             <h2>河川分署工程提報系統</h2>
             <div class="login-subtitle">
-                請輸入4位數登入碼
+                請輸入河川分署代碼及4位數登入碼
             </div>
-            <input id="loginCode" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="請輸入密碼">
+            <input id="loginDivisionCode" type="text" maxlength="20" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="河川分署代碼">
+            <div class="login-hint">河川分署代碼：01～10</div>
+            <input id="loginCode" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="請輸入登入碼">
             <button type="button" id="loginButton" class="primary-button">
                 登入
             </button>
@@ -1278,6 +1356,27 @@
                     ×
                 </button>
             </div>
+            <div class="line-reference-toolbar">
+                <div class="line-reference-item">
+                    <label class="line-reference-toggle" for="riverManagementToggle">
+                        <input type="checkbox" id="riverManagementToggle">
+                        <span>水道治理計畫線(黃線)(參考)</span>
+                    </label>
+                    <span id="riverManagementLayerStatus" class="line-reference-status">
+                        未載入；此圖層僅供描繪參考，不會儲存至案件資料。
+                    </span>
+                </div>
+
+                <div class="line-reference-item">
+                    <label class="line-reference-toggle" for="riverLandlineToggle">
+                        <input type="checkbox" id="riverLandlineToggle">
+                        <span>河川用地範圍線(紅線)(參考)</span>
+                    </label>
+                    <span id="riverLandlineLayerStatus" class="line-reference-status">
+                        未載入；此圖層僅供描繪參考，不會儲存至案件資料。
+                    </span>
+                </div>
+            </div>
             <div id="lineMap"></div>
             <div class="line-map-footer">
                 <div>
@@ -1334,10 +1433,18 @@
     const AUTH_STORAGE_KEY =
         "riverSystemAuthToken";
 
+    let currentAuthRole = "";
+    let currentAuthDivisionId = "";
+
 
     const loginGate =
         document.getElementById(
             "loginGate"
+        );
+
+    const loginDivisionCode =
+        document.getElementById(
+            "loginDivisionCode"
         );
 
     const loginCode =
@@ -1385,6 +1492,9 @@
             AUTH_STORAGE_KEY
         );
 
+        currentAuthRole = "";
+        currentAuthDivisionId = "";
+
         syncAuthTokenToForms();
 
     }
@@ -1421,6 +1531,56 @@
     }
 
 
+    function applyAuthScope(
+        role,
+        divisionId
+    ) {
+
+        currentAuthRole =
+            role || "";
+
+        currentAuthDivisionId =
+            String(
+                divisionId || ""
+            );
+
+
+        if (
+            currentAuthRole ===
+                "division" &&
+            currentAuthDivisionId &&
+            divisions[
+                currentAuthDivisionId
+            ]
+        ) {
+
+            divisionSelect.value =
+                currentAuthDivisionId;
+
+            divisionSelect.disabled =
+                true;
+
+            divisionSelect.title =
+                "已依登入河川分署鎖定";
+
+            divisionSelect.dispatchEvent(
+                new Event("change")
+            );
+
+            return;
+        }
+
+
+        // 管理模式維持原有功能：可自由切換河川分署。
+        divisionSelect.disabled =
+            false;
+
+        divisionSelect.title =
+            "";
+
+    }
+
+
     function showLoginGate(message) {
 
         loginGate.classList.remove(
@@ -1430,10 +1590,11 @@
         loginMessage.textContent =
             message || "";
 
+        loginDivisionCode.value = "";
         loginCode.value = "";
 
         setTimeout(function() {
-            loginCode.focus();
+            loginDivisionCode.focus();
         }, 50);
 
     }
@@ -1462,7 +1623,7 @@
             clearAuthToken();
 
             showLoginGate(
-                "登入已失效，請重新輸入登入碼。"
+                "登入已失效，請重新登入。"
             );
 
             return true;
@@ -1473,10 +1634,26 @@
 
     }
 
+
     function loginSystem() {
+
+        const loginId =
+            loginDivisionCode.value
+                .trim();
 
         const password =
             loginCode.value.trim();
+
+
+        if (!loginId) {
+
+            loginMessage.textContent =
+                "請輸入河川分署代碼。";
+
+            loginDivisionCode.focus();
+
+            return;
+        }
 
 
         if (
@@ -1484,7 +1661,9 @@
         ) {
 
             loginMessage.textContent =
-                "請輸入正確密碼。";
+                "請輸入4位數登入碼。";
+
+            loginCode.focus();
 
             return;
 
@@ -1520,6 +1699,10 @@
         script.src =
             GAS_URL +
             "?action=login" +
+            "&loginId=" +
+            encodeURIComponent(
+                loginId
+            ) +
             "&password=" +
             encodeURIComponent(
                 password
@@ -1566,7 +1749,7 @@
                 response &&
                 response.message ?
                 response.message :
-                "登入碼錯誤。";
+                "登入資料錯誤。";
 
             loginCode.value = "";
             loginCode.focus();
@@ -1580,6 +1763,11 @@
             response.token
         );
 
+        applyAuthScope(
+            response.role,
+            response.divisionId
+        );
+
         hideLoginGate();
 
     }
@@ -1588,6 +1776,22 @@
     loginButton.addEventListener(
         "click",
         loginSystem
+    );
+
+
+    loginDivisionCode.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                loginCode.focus();
+
+            }
+
+        }
     );
 
 
@@ -1605,6 +1809,7 @@
 
         }
     );
+
 
     function verifyExistingSession() {
 
@@ -1683,6 +1888,11 @@
 
             syncAuthTokenToForms();
 
+            applyAuthScope(
+                response.role,
+                response.divisionId
+            );
+
             hideLoginGate();
 
             return;
@@ -1693,7 +1903,7 @@
         clearAuthToken();
 
         showLoginGate(
-            "請輸入今日登入碼。"
+            "請重新登入系統。"
         );
 
     }
@@ -1730,8 +1940,21 @@
     }
 
     divisionSelect.addEventListener("change", function() {
+
+        if (
+            currentAuthRole === "division" &&
+            currentAuthDivisionId &&
+            this.value !== currentAuthDivisionId
+        ) {
+            this.value = currentAuthDivisionId;
+        }
+
         const id = this.value;
         syncDivisionToForm();
+
+        // 分署切換時清除前一分署的私人參考圖層。
+        resetRiverManagementLayer_();
+        resetRiverLandlineLayer_();
 
         if (!id) {
             map.setView([23.7, 120.9], 7);
@@ -1771,6 +1994,26 @@
     const lineStatus = document.getElementById("lineStatus");
     const linePointCount = document.getElementById("linePointCount");
     const lineLength = document.getElementById("lineLength");
+
+    const riverManagementToggle =
+        document.getElementById(
+            "riverManagementToggle"
+        );
+
+    const riverManagementLayerStatus =
+        document.getElementById(
+            "riverManagementLayerStatus"
+        );
+
+    const riverLandlineToggle =
+        document.getElementById(
+            "riverLandlineToggle"
+        );
+
+    const riverLandlineLayerStatus =
+        document.getElementById(
+            "riverLandlineLayerStatus"
+        );
 
     const plannedStart = document.getElementById("plannedStart");
     const plannedFinish = document.getElementById("plannedFinish");
@@ -1844,6 +2087,14 @@
 
     let lineMap = null;
     let drawnItems = null;
+
+    let riverManagementLayer = null;
+    let loadedRiverManagementDivision = "";
+    let riverManagementJsonpScript = null;
+
+    let riverLandlineLayer = null;
+    let loadedRiverLandlineDivision = "";
+    let riverLandlineJsonpScript = null;
 
 
     function updatePlannedDuration() {
@@ -2045,6 +2296,767 @@
 
 
     /**
+     * 更新私人水道治理計畫線參考圖層的狀態文字。
+     */
+    function setRiverManagementStatus_(
+        message,
+        state
+    ) {
+
+        riverManagementLayerStatus.textContent =
+            message || "";
+
+        riverManagementLayerStatus.className =
+            "line-reference-status" +
+            (state ? " " + state : "");
+    }
+
+
+    /**
+     * 建立水道治理計畫線專用 Leaflet Pane。
+     * z-index 低於一般 vector overlay，讓使用者實際繪製的工程線形顯示在上方。
+     */
+    function initializeRiverManagementLayer_() {
+
+        if (
+            !lineMap ||
+            riverManagementLayer
+        ) {
+            return;
+        }
+
+
+        if (
+            !lineMap.getPane(
+                "riverManagementPane"
+            )
+        ) {
+
+            lineMap.createPane(
+                "riverManagementPane"
+            );
+
+            lineMap.getPane(
+                "riverManagementPane"
+            ).style.zIndex = 350;
+
+            lineMap.getPane(
+                "riverManagementPane"
+            ).style.pointerEvents = "none";
+        }
+
+
+        riverManagementLayer =
+            L.geoJSON(
+                null,
+                {
+                    pane: "riverManagementPane",
+                    interactive: false,
+                    smoothFactor: 0,
+                    style: function() {
+                        return {
+                            color: "#FFD600",
+                            weight: 4,
+                            opacity: 0.95,
+                            lineCap: "round",
+                            lineJoin: "round"
+                        };
+                    }
+                }
+            );
+    }
+
+
+    function removeRiverManagementJsonpScript_() {
+
+        if (riverManagementJsonpScript) {
+            riverManagementJsonpScript.remove();
+            riverManagementJsonpScript = null;
+        }
+    }
+
+
+    /**
+     * 清除目前已載入的參考水道治理計畫線。
+     * 切換河川分署時會呼叫，避免上一分署的治理線殘留。
+     */
+    function resetRiverManagementLayer_() {
+
+        removeRiverManagementJsonpScript_();
+
+        loadedRiverManagementDivision = "";
+
+        if (riverManagementToggle) {
+            riverManagementToggle.checked = false;
+        }
+
+        if (riverManagementLayer) {
+
+            if (
+                lineMap &&
+                lineMap.hasLayer(
+                    riverManagementLayer
+                )
+            ) {
+                lineMap.removeLayer(
+                    riverManagementLayer
+                );
+            }
+
+            riverManagementLayer.clearLayers();
+        }
+
+        setRiverManagementStatus_(
+            "未載入；此圖層僅供描繪參考，不會儲存至案件資料。",
+            ""
+        );
+    }
+
+
+    /**
+     * 透過已登入的 Apps Script Session Token，
+     * 只取得目前河川分署的私人水道治理計畫線 GeoJSON。
+     */
+    function loadRiverManagementLine_() {
+
+        const divisionId =
+            divisionSelect.value;
+
+        if (!divisionId) {
+
+            riverManagementToggle.checked = false;
+
+            alert(
+                "請先從頁面上方選擇河川分署。"
+            );
+
+            return;
+        }
+
+
+        initializeRiverManagementLayer_();
+
+
+        // 同一分署已載入過，只需重新顯示，不重複向 Drive 取檔。
+        if (
+            loadedRiverManagementDivision ===
+                divisionId &&
+            riverManagementLayer &&
+            riverManagementLayer.getLayers().length > 0
+        ) {
+
+            riverManagementLayer.addTo(
+                lineMap
+            );
+
+            setRiverManagementStatus_(
+                "水道治理計畫線已顯示。",
+                "success"
+            );
+
+            return;
+        }
+
+
+        removeRiverManagementJsonpScript_();
+
+        if (riverManagementLayer) {
+            riverManagementLayer.clearLayers();
+        }
+
+        loadedRiverManagementDivision = "";
+
+        setRiverManagementStatus_(
+            "水道治理計畫線載入中...",
+            "loading"
+        );
+
+
+        const script =
+            document.createElement(
+                "script"
+            );
+
+        riverManagementJsonpScript =
+            script;
+
+        script.src =
+            GAS_URL +
+            "?action=readRiverManagementLine" +
+            "&division=" +
+            encodeURIComponent(
+                divisionId
+            ) +
+            "&token=" +
+            encodeURIComponent(
+                getAuthToken()
+            ) +
+            "&callback=handleRiverManagementLineResponse" +
+            "&_t=" +
+            Date.now();
+
+
+        script.onerror =
+            function() {
+
+                removeRiverManagementJsonpScript_();
+
+                riverManagementToggle.checked =
+                    false;
+
+                setRiverManagementStatus_(
+                    "水道治理計畫線載入失敗，請稍後再試。",
+                    "error"
+                );
+            };
+
+
+        document.body.appendChild(
+            script
+        );
+    }
+
+
+    /**
+     * Apps Script JSONP callback。
+     */
+    function handleRiverManagementLineResponse(
+        response
+    ) {
+
+        removeRiverManagementJsonpScript_();
+
+
+        if (
+            handleAuthFailure(
+                response
+            )
+        ) {
+
+            riverManagementToggle.checked =
+                false;
+
+            if (
+                riverManagementLayer &&
+                lineMap &&
+                lineMap.hasLayer(
+                    riverManagementLayer
+                )
+            ) {
+                lineMap.removeLayer(
+                    riverManagementLayer
+                );
+            }
+
+            setRiverManagementStatus_(
+                "登入已失效，請重新登入後再載入水道治理計畫線。",
+                "error"
+            );
+
+            return;
+        }
+
+
+        if (
+            !response ||
+            response.success !== true ||
+            !response.data
+        ) {
+
+            riverManagementToggle.checked =
+                false;
+
+            setRiverManagementStatus_(
+                response && response.message
+                    ? response.message
+                    : "水道治理計畫線讀取失敗。",
+                "error"
+            );
+
+            return;
+        }
+
+
+        // 使用者在載入期間已切換分署時，不顯示舊分署資料。
+        if (
+            String(response.division) !==
+            String(divisionSelect.value)
+        ) {
+            return;
+        }
+
+
+        initializeRiverManagementLayer_();
+
+        riverManagementLayer.clearLayers();
+
+        try {
+
+            riverManagementLayer.addData(
+                response.data
+            );
+
+        } catch (error) {
+
+            riverManagementToggle.checked =
+                false;
+
+            setRiverManagementStatus_(
+                "水道治理計畫線 GeoJSON 無法顯示。",
+                "error"
+            );
+
+            console.error(
+                "水道治理計畫線顯示失敗：",
+                error
+            );
+
+            return;
+        }
+
+
+        loadedRiverManagementDivision =
+            String(
+                response.division
+            );
+
+
+        if (riverManagementToggle.checked) {
+            riverManagementLayer.addTo(
+                lineMap
+            );
+        }
+
+
+        const featureCount =
+            Number(
+                response.featureCount
+            ) ||
+            riverManagementLayer
+                .getLayers()
+                .length;
+
+        setRiverManagementStatus_(
+            "已載入 " +
+            featureCount +
+            " 筆水道治理計畫線；僅供描繪參考。",
+            "success"
+        );
+    }
+
+
+    riverManagementToggle.addEventListener(
+        "change",
+        function() {
+
+            if (this.checked) {
+                loadRiverManagementLine_();
+                return;
+            }
+
+            if (
+                riverManagementLayer &&
+                lineMap &&
+                lineMap.hasLayer(
+                    riverManagementLayer
+                )
+            ) {
+                lineMap.removeLayer(
+                    riverManagementLayer
+                );
+            }
+
+            if (
+                loadedRiverManagementDivision
+            ) {
+                setRiverManagementStatus_(
+                    "水道治理計畫線已隱藏；再次勾選即可顯示。",
+                    ""
+                );
+            } else {
+                setRiverManagementStatus_(
+                    "未載入；此圖層僅供描繪參考，不會儲存至案件資料。",
+                    ""
+                );
+            }
+        }
+    );
+
+
+    /**
+     * 更新私人「河川用地範圍線(紅線)」參考圖層狀態文字。
+     */
+    function setRiverLandlineStatus_(
+        message,
+        state
+    ) {
+
+        riverLandlineLayerStatus.textContent =
+            message || "";
+
+        riverLandlineLayerStatus.className =
+            "line-reference-status" +
+            (state ? " " + state : "");
+    }
+
+
+    /**
+     * 建立河川用地範圍線專用 Leaflet Pane。
+     * 參考圖層位於使用者實際繪製線形的下方。
+     */
+    function initializeRiverLandlineLayer_() {
+
+        if (
+            !lineMap ||
+            riverLandlineLayer
+        ) {
+            return;
+        }
+
+        if (
+            !lineMap.getPane(
+                "riverLandlinePane"
+            )
+        ) {
+
+            lineMap.createPane(
+                "riverLandlinePane"
+            );
+
+            lineMap.getPane(
+                "riverLandlinePane"
+            ).style.zIndex = 345;
+
+            lineMap.getPane(
+                "riverLandlinePane"
+            ).style.pointerEvents = "none";
+        }
+
+        riverLandlineLayer =
+            L.geoJSON(
+                null,
+                {
+                    pane: "riverLandlinePane",
+                    interactive: false,
+                    smoothFactor: 0,
+                    style: function() {
+                        return {
+                            color: "#D32F2F",
+                            weight: 4,
+                            opacity: 0.95,
+                            lineCap: "round",
+                            lineJoin: "round"
+                        };
+                    }
+                }
+            );
+    }
+
+
+    function removeRiverLandlineJsonpScript_() {
+
+        if (riverLandlineJsonpScript) {
+            riverLandlineJsonpScript.remove();
+            riverLandlineJsonpScript = null;
+        }
+    }
+
+
+    /**
+     * 清除目前已載入的河川用地範圍線。
+     * 切換河川分署時會呼叫，避免上一分署圖層殘留。
+     */
+    function resetRiverLandlineLayer_() {
+
+        removeRiverLandlineJsonpScript_();
+
+        loadedRiverLandlineDivision = "";
+
+        if (riverLandlineToggle) {
+            riverLandlineToggle.checked = false;
+        }
+
+        if (riverLandlineLayer) {
+
+            if (
+                lineMap &&
+                lineMap.hasLayer(
+                    riverLandlineLayer
+                )
+            ) {
+                lineMap.removeLayer(
+                    riverLandlineLayer
+                );
+            }
+
+            riverLandlineLayer.clearLayers();
+        }
+
+        setRiverLandlineStatus_(
+            "未載入；此圖層僅供描繪參考，不會儲存至案件資料。",
+            ""
+        );
+    }
+
+
+    /**
+     * 透過已登入的 Apps Script Session Token，
+     * 只取得目前河川分署的私人河川用地範圍線 GeoJSON。
+     */
+    function loadRiverLandline_() {
+
+        const divisionId =
+            divisionSelect.value;
+
+        if (!divisionId) {
+
+            riverLandlineToggle.checked = false;
+
+            alert(
+                "請先從頁面上方選擇河川分署。"
+            );
+
+            return;
+        }
+
+        initializeRiverLandlineLayer_();
+
+        // 同一分署已載入過，只需重新顯示，不重複向 Drive 取檔。
+        if (
+            loadedRiverLandlineDivision ===
+                divisionId &&
+            riverLandlineLayer &&
+            riverLandlineLayer.getLayers().length > 0
+        ) {
+
+            riverLandlineLayer.addTo(
+                lineMap
+            );
+
+            setRiverLandlineStatus_(
+                "河川用地範圍線已顯示。",
+                "success"
+            );
+
+            return;
+        }
+
+        removeRiverLandlineJsonpScript_();
+
+        if (riverLandlineLayer) {
+            riverLandlineLayer.clearLayers();
+        }
+
+        loadedRiverLandlineDivision = "";
+
+        setRiverLandlineStatus_(
+            "河川用地範圍線載入中...",
+            "loading"
+        );
+
+        const script =
+            document.createElement(
+                "script"
+            );
+
+        riverLandlineJsonpScript =
+            script;
+
+        script.src =
+            GAS_URL +
+            "?action=readRiverLandline" +
+            "&division=" +
+            encodeURIComponent(
+                divisionId
+            ) +
+            "&token=" +
+            encodeURIComponent(
+                getAuthToken()
+            ) +
+            "&callback=handleRiverLandlineResponse" +
+            "&_t=" +
+            Date.now();
+
+        script.onerror =
+            function() {
+
+                removeRiverLandlineJsonpScript_();
+
+                riverLandlineToggle.checked =
+                    false;
+
+                setRiverLandlineStatus_(
+                    "河川用地範圍線載入失敗，請稍後再試。",
+                    "error"
+                );
+            };
+
+        document.body.appendChild(
+            script
+        );
+    }
+
+
+    /**
+     * Apps Script JSONP callback。
+     */
+    function handleRiverLandlineResponse(
+        response
+    ) {
+
+        removeRiverLandlineJsonpScript_();
+
+        if (
+            handleAuthFailure(
+                response
+            )
+        ) {
+
+            riverLandlineToggle.checked =
+                false;
+
+            if (
+                riverLandlineLayer &&
+                lineMap &&
+                lineMap.hasLayer(
+                    riverLandlineLayer
+                )
+            ) {
+                lineMap.removeLayer(
+                    riverLandlineLayer
+                );
+            }
+
+            setRiverLandlineStatus_(
+                "登入已失效，請重新登入後再載入河川用地範圍線。",
+                "error"
+            );
+
+            return;
+        }
+
+        if (
+            !response ||
+            response.success !== true ||
+            !response.data
+        ) {
+
+            riverLandlineToggle.checked =
+                false;
+
+            setRiverLandlineStatus_(
+                response && response.message
+                    ? response.message
+                    : "河川用地範圍線讀取失敗。",
+                "error"
+            );
+
+            return;
+        }
+
+        // 使用者在載入期間已切換分署時，不顯示舊分署資料。
+        if (
+            String(response.division) !==
+            String(divisionSelect.value)
+        ) {
+            return;
+        }
+
+        initializeRiverLandlineLayer_();
+
+        riverLandlineLayer.clearLayers();
+
+        try {
+
+            riverLandlineLayer.addData(
+                response.data
+            );
+
+        } catch (error) {
+
+            riverLandlineToggle.checked =
+                false;
+
+            setRiverLandlineStatus_(
+                "河川用地範圍線 GeoJSON 無法顯示。",
+                "error"
+            );
+
+            console.error(
+                "河川用地範圍線顯示失敗：",
+                error
+            );
+
+            return;
+        }
+
+        loadedRiverLandlineDivision =
+            String(
+                response.division
+            );
+
+        if (riverLandlineToggle.checked) {
+            riverLandlineLayer.addTo(
+                lineMap
+            );
+        }
+
+        const featureCount =
+            Number(
+                response.featureCount
+            ) ||
+            riverLandlineLayer
+                .getLayers()
+                .length;
+
+        setRiverLandlineStatus_(
+            "已載入 " +
+            featureCount +
+            " 筆河川用地範圍線；僅供描繪參考。",
+            "success"
+        );
+    }
+
+
+    riverLandlineToggle.addEventListener(
+        "change",
+        function() {
+
+            if (this.checked) {
+                loadRiverLandline_();
+                return;
+            }
+
+            if (
+                riverLandlineLayer &&
+                lineMap &&
+                lineMap.hasLayer(
+                    riverLandlineLayer
+                )
+            ) {
+                lineMap.removeLayer(
+                    riverLandlineLayer
+                );
+            }
+
+            if (
+                loadedRiverLandlineDivision
+            ) {
+                setRiverLandlineStatus_(
+                    "河川用地範圍線已隱藏；再次勾選即可顯示。",
+                    ""
+                );
+            } else {
+                setRiverLandlineStatus_(
+                    "未載入；此圖層僅供描繪參考，不會儲存至案件資料。",
+                    ""
+                );
+            }
+        }
+    );
+
+
+    /**
      * 第一次使用時建立 Leaflet.draw 編輯器。
      * 同一案件可以保留多條線，不再清除前一條。
      */
@@ -2062,13 +3074,55 @@
             }
         ).addTo(lineMap);
 
+        initializeRiverManagementLayer_();
+        initializeRiverLandlineLayer_();
+
         drawnItems = new L.FeatureGroup();
         lineMap.addLayer(drawnItems);
+
+        // 工具名稱：一般線形 + 封閉線形。
+        // 封閉線形在繪製時借用 Polygon 的「點回第一點完成」操作，
+        // 完成後立即轉成 Closed LineString，因此後端、GeoJSON、SHP 都仍沿用線資料。
+        if (
+            L.drawLocal &&
+            L.drawLocal.draw &&
+            L.drawLocal.draw.toolbar &&
+            L.drawLocal.draw.toolbar.buttons
+        ) {
+            L.drawLocal.draw.toolbar.buttons.polyline =
+                "繪製一般工程線形";
+
+            L.drawLocal.draw.toolbar.buttons.polygon =
+                "繪製封閉工程線形";
+        }
+
+        if (
+            L.drawLocal &&
+            L.drawLocal.draw &&
+            L.drawLocal.draw.handlers &&
+            L.drawLocal.draw.handlers.polygon &&
+            L.drawLocal.draw.handlers.polygon.tooltip
+        ) {
+            L.drawLocal.draw.handlers.polygon.tooltip.start =
+                "點擊開始繪製封閉工程線形";
+
+            L.drawLocal.draw.handlers.polygon.tooltip.cont =
+                "繼續點選工程線形節點";
+
+            L.drawLocal.draw.handlers.polygon.tooltip.end =
+                "點擊最初的節點以封閉工程線形";
+        }
 
         const drawControl = new L.Control.Draw({
             draw: {
                 polyline: true,
-                polygon: false,
+                polygon: {
+                    allowIntersection: true,
+                    showArea: false,
+                    shapeOptions: {
+                        fill: false
+                    }
+                },
                 rectangle: false,
                 circle: false,
                 circlemarker: false,
@@ -2083,9 +3137,45 @@
 
         lineMap.addControl(drawControl);
 
-        // 新增一段線形
+        // 新增一段線形。
+        // 若使用「封閉工程線形」工具，Leaflet.draw 會先建立 Polygon；
+        // 此處將其外框轉為「第一點 = 最後一點」的 Closed LineString。
         lineMap.on(L.Draw.Event.CREATED, function(event) {
-            drawnItems.addLayer(event.layer);
+
+            let layer = event.layer;
+
+            if (event.layerType === "polygon") {
+
+                const polygonLatLngs =
+                    layer.getLatLngs();
+
+                const ring =
+                    polygonLatLngs && polygonLatLngs[0]
+                        ? polygonLatLngs[0].slice()
+                        : [];
+
+                if (ring.length >= 3) {
+
+                    const first = ring[0];
+                    const last = ring[ring.length - 1];
+
+                    if (
+                        first.lat !== last.lat ||
+                        first.lng !== last.lng
+                    ) {
+                        ring.push(
+                            L.latLng(
+                                first.lat,
+                                first.lng
+                            )
+                        );
+                    }
+
+                    layer = L.polyline(ring);
+                }
+            }
+
+            drawnItems.addLayer(layer);
             updateLineInformation();
         });
 
@@ -5284,6 +6374,7 @@
 
         "蘭陽溪水系": [
             "蘭陽溪",
+            "安農溪",
             "羅東溪",
             "宜蘭河",
             "大礁溪",
