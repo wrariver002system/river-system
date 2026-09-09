@@ -189,6 +189,19 @@
             margin-bottom: 10px;
         }
 
+        .data-header-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .meeting-export-status {
+            font-size: 13px;
+            color: #4b5563;
+        }
+
         #dataStatus {
             margin: 8px 0 14px;
             color: #666;
@@ -688,6 +701,78 @@
     line-height: 1.45;
 }
 
+/* 提報內容：全部附表彙整總覽 */
+.all-appendices-view {
+    margin-top: 18px;
+}
+
+.all-appendices-note {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-left: 4px solid #f0a000;
+    background: #fff8df;
+    color: #755200;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.all-appendix-section {
+    margin-top: 22px;
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.all-appendix-section:first-of-type {
+    margin-top: 0;
+}
+
+.all-appendix-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #f6f8fb;
+    border-bottom: 1px solid #d8dee8;
+    flex-wrap: wrap;
+}
+
+.all-appendix-section-title {
+    margin: 0;
+    font-size: 18px;
+}
+
+.all-appendix-section-meta {
+    margin-top: 4px;
+    color: #5f6b7a;
+    font-size: 13px;
+}
+
+.all-appendix-dashboard-wrap {
+    padding: 14px;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.all-appendix-table-wrap {
+    overflow-x: auto;
+}
+
+.all-appendix-table-wrap .business-table {
+    margin: 0;
+}
+
+.all-appendix-empty {
+    padding: 18px;
+    color: #6b7280;
+    text-align: center;
+}
+
+.all-appendix-jump-button {
+    white-space: nowrap;
+}
+
 @media (max-width: 1100px) {
     .content-overview-grid {
         grid-template-columns: 1fr;
@@ -951,6 +1036,75 @@
     cursor: not-allowed;
 }
 
+
+
+/* =====================================================
+   提報內容：案件優先順序拖曳
+   ===================================================== */
+.case-order-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+#caseOrderStatus {
+    color: #666;
+    font-size: 13px;
+    min-height: 18px;
+}
+
+.business-table .business-order-cell {
+    white-space: nowrap;
+}
+
+.case-order-number {
+    display: inline-block;
+    min-width: 20px;
+}
+
+.case-sort-handle {
+    display: none;
+    margin-right: 8px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: #1565c0;
+    font-weight: bold;
+    cursor: grab;
+    user-select: none;
+}
+
+#singleAppendixTableWrap.case-sort-mode .case-sort-handle {
+    display: inline-block;
+}
+
+#singleAppendixTableWrap.case-sort-mode tbody tr {
+    cursor: grab;
+    background: #fffdf5;
+}
+
+#singleAppendixTableWrap.case-sort-mode tbody tr:hover {
+    background: #fff8dc;
+}
+
+#singleAppendixTableWrap.case-sort-mode tbody tr.case-sort-dragging {
+    opacity: 0.45;
+    background: #e3f2fd;
+}
+
+#singleAppendixTableWrap.case-sort-mode tbody tr.case-sort-drop-target {
+    box-shadow: inset 0 3px 0 #1976d2;
+}
+
+.case-order-hint {
+    margin: 8px 0 10px;
+    padding: 9px 12px;
+    border-left: 4px solid #1976d2;
+    background: #eef6ff;
+    color: #335;
+    font-size: 13px;
+}
+
 </style>
 </head>
 
@@ -1000,14 +1154,29 @@
             <div class="appendix-selector-panel">
                 <label for="businessAppendixType">查看附表：</label>
                 <select id="businessAppendixType">
+                    <option value="all">全部附表－彙整總覽</option>
                     <option value="appendix1">附表1－中央管河川整體改善</option>
                     <option value="appendix2">附表2－中央管區排整體改善</option>
+                    <option value="appendix3">附表3－土地調適改善措施</option>
+                    <option value="appendix4">附表4－整體環境改善</option>
+                    <option value="appendix5">附表5－整建工程</option>
+                    <option value="appendix6">附表6－構造物維修改善工程</option>
                 </select>
-                <span class="appendix-phase-note">可切換查看各附表的案件明細、統計與工程位置。</span>
+                <span class="appendix-phase-note">可切換查看單一附表，或選擇「全部附表」一次查看本分署所有案件、儀表板與工程位置。</span>
             </div>
             <div class="data-header">
                 <h2 id="businessDataTitle">附表1-「基礎設施防護-中央管河川整體改善」案件明細表</h2>
-                <button type="button" class="secondary-button" id="refreshDataButton">重新載入資料</button>
+                <div class="data-header-actions">
+                    <span id="meetingExcelExportStatus" class="meeting-export-status"></span>
+                    <div class="case-order-actions">
+                        <span id="caseOrderStatus"></span>
+                        <button type="button" class="secondary-button" id="startCaseOrderButton" style="display:none;">↕ 調整優先順序</button>
+                        <button type="button" class="primary-button" id="saveCaseOrderButton" style="display:none;">儲存排序</button>
+                        <button type="button" class="secondary-button" id="cancelCaseOrderButton" style="display:none;">取消排序</button>
+                    </div>
+                    <button type="button" class="secondary-button" id="refreshDataButton">重新載入資料</button>
+                    <button type="button" class="primary-button" id="meetingExcelExportButton" style="display:none;">📥 匯出會議附件 Excel</button>
+                </div>
             </div>
             <div id="dataStatus">尚未載入資料</div>
             <div class="content-overview-grid">
@@ -1024,12 +1193,13 @@
                     <div id="overviewLineMap"></div>
                 </section>
             </div>
-            <div class="table-wrap">
+            <div class="table-wrap" id="singleAppendixTableWrap">
                 <table class="business-table">
                     <thead id="businessDataHead"></thead>
                     <tbody id="businessDataBody"></tbody>
                 </table>
             </div>
+            <div id="allAppendicesView" class="all-appendices-view" style="display:none;"></div>
         </div>
     </div>
     <div id="dataEntryPage" class="page">
@@ -1039,6 +1209,10 @@
                 <select id="appendixType">
                     <option value="appendix1">附表1－中央管河川整體改善</option>
                     <option value="appendix2">附表2－中央管區排整體改善</option>
+                    <option value="appendix3">附表3－土地調適改善措施</option>
+                    <option value="appendix4">附表4－整體環境改善</option>
+                    <option value="appendix5">附表5－整建工程</option>
+                    <option value="appendix6">附表6－構造物維修改善工程</option>
                 </select>
                 <span id="appendixPhaseNote" class="appendix-phase-note"></span>
             </div>
@@ -1130,6 +1304,29 @@
                             </select>
                             <div class="helper-text">依頁面上方所選河川分署，自動帶入該分署轄管之中央管區域排水。</div>
                         </div>
+
+                        <div class="form-field appendix3-only" style="display:none;">
+                            <label for="coastName">海岸名稱</label>
+                            <input id="coastName" name="coastName" type="text" placeholder="請填列海岸名稱">
+                        </div>
+
+                        <div class="form-field appendix456-only" style="display:none;">
+                            <label for="flowCategory">流域別</label>
+                            <select id="flowCategory" name="flowCategory">
+                                <option value=""></option>
+                                <option value="河川">河川</option>
+                                <option value="區排">區排</option>
+                                <option value="海岸">海岸</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field appendix456-only" style="display:none;">
+                            <label for="waterbodyName">溪別、區排或海岸名稱</label>
+                            <input id="waterbodyName" name="waterbodyName" type="text" list="waterbodyNameSuggestions" placeholder="請先選擇流域別">
+                            <datalist id="waterbodyNameSuggestions"></datalist>
+                            <div id="waterbodyHelperText" class="helper-text">選擇「河川」或「區排」時，系統會依目前河川分署提供名稱建議；選擇「海岸」時可直接輸入海岸名稱。</div>
+                        </div>
+
                         <div class="form-field full">
                             <label for="caseName">案件名稱</label>
                             <input id="caseName" name="caseName" type="text">
@@ -1143,14 +1340,47 @@
                             <label for="structureName">建造物名稱</label>
                             <input id="structureName" name="structureName" type="text">
                         </div>
-                        <div class="form-field">
-                            <label for="leveeLength">堤防(公尺)</label>
+
+                        <div class="form-field appendix-levee-revetment">
+                            <label id="leveeLengthLabel" for="leveeLength">堤防(公尺)</label>
                             <input id="leveeLength" name="leveeLength" type="number" step="any">
                         </div>
-                        <div class="form-field">
+
+                        <div class="form-field appendix-levee-revetment">
                             <label for="revetmentLength">護岸(公尺)</label>
                             <input id="revetmentLength" name="revetmentLength" type="number" step="any">
                         </div>
+
+                        <div class="form-field appendix3-only" style="display:none;">
+                            <label for="improvementArea">改善面積(公頃)</label>
+                            <input id="improvementArea" name="improvementArea" type="number" step="any">
+                        </div>
+
+                        <div class="form-field appendix3-only" style="display:none;">
+                            <label for="improvementLength">改善長度(公尺)</label>
+                            <input id="improvementLength" name="improvementLength" type="number" step="any">
+                        </div>
+
+                        <div class="form-field appendix4-only" style="display:none;">
+                            <label for="projectEnvLength">整體環境改善長度(公尺)</label>
+                            <input id="projectEnvLength" name="projectEnvLength" type="number" step="any">
+                        </div>
+
+                        <div class="form-field appendix4-only" style="display:none;">
+                            <label for="projectEnvArea">整體環境改善面積(公頃)</label>
+                            <input id="projectEnvArea" name="projectEnvArea" type="number" step="any">
+                        </div>
+
+                        <div class="form-field appendix6-only" style="display:none;">
+                            <label for="gateImprovementCount">水門更新改善(座)</label>
+                            <input id="gateImprovementCount" name="gateImprovementCount" type="number" step="any">
+                        </div>
+
+                        <div class="form-field appendix6-only" style="display:none;">
+                            <label for="floodRoadArea">水防道路維護(平方公尺)</label>
+                            <input id="floodRoadArea" name="floodRoadArea" type="number" step="any">
+                        </div>
+
                         <div class="form-field full">
                             <label for="otherWork">其他(請說明)</label>
                             <textarea id="otherWork" name="otherWork"></textarea>
@@ -1172,9 +1402,14 @@
                             <label for="ecoLandscapeLength">生態友善及地景營造長度(公尺)</label>
                             <input id="ecoLandscapeLength" name="ecoLandscapeLength" type="number" step="any">
                         </div>
-                        <div class="form-field">
+                        <div class="form-field appendix-standard-benefit-area">
                             <label for="envImprovementArea">整體環境改善面積(公頃)</label>
                             <input id="envImprovementArea" name="envImprovementArea" type="number" step="any">
+                        </div>
+
+                        <div class="form-field appendix4-only" style="display:none;">
+                            <label for="ecoLandscapeArea">生態友善及地景營造面積(公頃)</label>
+                            <input id="ecoLandscapeArea" name="ecoLandscapeArea" type="number" step="any">
                         </div>
                     </div>
                 </section>
@@ -1294,15 +1529,15 @@
                     <h3 class="form-section-title">年度預估使用經費(千元)</h3>
                     <div class="form-grid">
                         <div class="form-field">
-                            <label for="budget116">116年(A)</label>
+                            <label for="budget116">115年(A)</label>
                             <input id="budget116" name="budget116" type="number" step="any">
                         </div>
                         <div class="form-field">
-                            <label for="budget117">117年(B)</label>
+                            <label for="budget117">116年(B)</label>
                             <input id="budget117" name="budget117" type="number" step="any">
                         </div>
                         <div class="form-field">
-                            <label for="budget118">118年以後(含)(C)</label>
+                            <label for="budget118">117年(C)</label>
                             <input id="budget118" name="budget118" type="number" step="any">
                         </div>
                         <div class="form-field">
@@ -1543,6 +1778,18 @@
             String(
                 divisionId || ""
             );
+
+
+        if (meetingExcelExportButton) {
+            meetingExcelExportButton.style.display =
+                currentAuthRole === "admin"
+                    ? ""
+                    : "none";
+        }
+
+        if (meetingExcelExportStatus) {
+            meetingExcelExportStatus.textContent = "";
+        }
 
 
         if (
@@ -1917,16 +2164,16 @@
     }).addTo(map);
 
     const divisions = {
-        1: { name: "第一河川分署", lat: 24.75, lng: 121.75 },
-        2: { name: "第二河川分署", lat: 24.8, lng: 121.0 },
-        3: { name: "第三河川分署", lat: 24.2, lng: 120.7 },
-        4: { name: "第四河川分署", lat: 23.9, lng: 120.5 },
-        5: { name: "第五河川分署", lat: 23.5, lng: 120.4 },
-        6: { name: "第六河川分署", lat: 23.0, lng: 120.2 },
-        7: { name: "第七河川分署", lat: 22.65, lng: 120.3 },
-        8: { name: "第八河川分署", lat: 22.75, lng: 121.1 },
-        9: { name: "第九河川分署", lat: 23.98, lng: 121.6 },
-        10: { name: "第十河川分署", lat: 25.05, lng: 121.5 }
+        1: { name: "第一河川分署", shortName: "一", lat: 24.75, lng: 121.75 },
+        2: { name: "第二河川分署", shortName: "二", lat: 24.8, lng: 121.0 },
+        3: { name: "第三河川分署", shortName: "三", lat: 24.2, lng: 120.7 },
+        4: { name: "第四河川分署", shortName: "四", lat: 23.9, lng: 120.5 },
+        5: { name: "第五河川分署", shortName: "五", lat: 23.5, lng: 120.4 },
+        6: { name: "第六河川分署", shortName: "六", lat: 23.0, lng: 120.2 },
+        7: { name: "第七河川分署", shortName: "七", lat: 22.65, lng: 120.3 },
+        8: { name: "第八河川分署", shortName: "八", lat: 22.75, lng: 121.1 },
+        9: { name: "第九河川分署", shortName: "九", lat: 23.98, lng: 121.6 },
+        10: { name: "第十河川分署", shortName: "十", lat: 25.05, lng: 121.5 }
     };
 
     let currentMarker = null;
@@ -1936,7 +2183,10 @@
 
     function syncDivisionToForm() {
         const id = divisionSelect.value;
-        formDivision.value = id && divisions[id] ? divisions[id].name : "";
+        formDivision.value =
+            id && divisions[id]
+                ? divisions[id].shortName
+                : "";
     }
 
     divisionSelect.addEventListener("change", function() {
@@ -3642,6 +3892,20 @@
             }
 
             if (targetPage === "businessDataPage") {
+                // 每次進入「提報內容」時，預設先看全部附表彙整總覽。
+                const businessAppendixSelect =
+                    document.getElementById(
+                        "businessAppendixType"
+                    );
+
+                if (businessAppendixSelect) {
+                    businessAppendixSelect.value =
+                        "all";
+                }
+
+                // 同步套用第一、四、八、九分署的附表2限制。
+                updateRegionalDrainageRestrictions();
+
                 loadBusinessData();
 
                 setTimeout(function() {
@@ -3793,6 +4057,139 @@
     const ecologyGrid =
         document.getElementById("ecologyGrid");
 
+    const coastNameInput =
+        document.getElementById("coastName");
+
+    const flowCategoryInput =
+        document.getElementById("flowCategory");
+
+    const waterbodyNameInput =
+        document.getElementById("waterbodyName");
+
+    const waterbodyNameSuggestions =
+        document.getElementById("waterbodyNameSuggestions");
+
+    const leveeLengthLabel =
+        document.getElementById("leveeLengthLabel");
+
+
+    const APPENDIX_CLIENT_CONFIG = {
+
+        appendix1: {
+            title: '附表1-「基礎設施防護-中央管河川整體改善」案件資料登錄',
+            businessTitle: '附表1-「基礎設施防護-中央管河川整體改善」案件明細表',
+            caseIdIndex: 36,
+            sortOrderIndex: 37,
+            caseNameIndex: 7,
+            formalLastIndex: 35,
+            hiddenStart: 30,
+            hiddenEnd: 34,
+            totalFundingIndex: 28,
+            budgetAIndex: 25,
+            optionalOtherIndex: 11,
+            conditionalLandCostIndex: 20,
+            editableEndIndex: 29,
+            managerHeaders: ["項次", "案件名稱", "縣市", "鄉鎮市", "水系", "溪別", "操作"]
+        },
+
+        appendix2: {
+            title: '附表2-「基礎設施防護-中央管區排整體改善」案件資料登錄',
+            businessTitle: '附表2-「基礎設施防護-中央管區排整體改善」案件明細表',
+            caseIdIndex: 34,
+            sortOrderIndex: 35,
+            caseNameIndex: 6,
+            formalLastIndex: 33,
+            hiddenStart: 28,
+            hiddenEnd: 32,
+            totalFundingIndex: 26,
+            budgetAIndex: 23,
+            optionalOtherIndex: 10,
+            conditionalLandCostIndex: 18,
+            editableEndIndex: 27,
+            managerHeaders: ["項次", "案件名稱", "縣市", "鄉鎮市", "排水名稱", "操作"]
+        },
+
+        appendix3: {
+            title: '附表3-「土地調適改善措施」案件資料登錄',
+            businessTitle: '附表3-「土地調適改善措施」案件明細表',
+            caseIdIndex: 34,
+            sortOrderIndex: 35,
+            caseNameIndex: 6,
+            formalLastIndex: 33,
+            hiddenStart: 28,
+            hiddenEnd: 32,
+            totalFundingIndex: 26,
+            budgetAIndex: 23,
+            optionalOtherIndex: 10,
+            conditionalLandCostIndex: 18,
+            editableEndIndex: 27,
+            managerHeaders: ["項次", "案件名稱", "縣市", "鄉鎮市", "海岸名稱", "操作"]
+        },
+
+        appendix4: {
+            title: '附表4-「整體環境改善」案件資料登錄',
+            businessTitle: '附表4-「整體環境改善」案件明細表',
+            caseIdIndex: 35,
+            sortOrderIndex: 36,
+            caseNameIndex: 7,
+            formalLastIndex: 34,
+            hiddenStart: 29,
+            hiddenEnd: 33,
+            totalFundingIndex: 27,
+            budgetAIndex: 24,
+            optionalOtherIndex: 11,
+            conditionalLandCostIndex: 19,
+            editableEndIndex: 28,
+            managerHeaders: ["項次", "案件名稱", "縣市", "鄉鎮市", "流域別", "溪別、區排或海岸名稱", "操作"]
+        },
+
+        appendix5: {
+            title: '附表5-「整建工程」案件資料登錄',
+            businessTitle: '附表5-「整建工程」案件明細表',
+            caseIdIndex: 35,
+            sortOrderIndex: 36,
+            caseNameIndex: 7,
+            formalLastIndex: 34,
+            hiddenStart: 29,
+            hiddenEnd: 33,
+            totalFundingIndex: 27,
+            budgetAIndex: 24,
+            optionalOtherIndex: 11,
+            conditionalLandCostIndex: 19,
+            editableEndIndex: 28,
+            managerHeaders: ["項次", "案件名稱", "縣市", "鄉鎮市", "流域別", "溪別、區排或海岸名稱", "操作"]
+        },
+
+        appendix6: {
+            title: '附表6-「構造物維修改善工程」案件資料登錄',
+            businessTitle: '附表6-「構造物維修改善工程」案件明細表',
+            caseIdIndex: 37,
+            sortOrderIndex: 38,
+            caseNameIndex: 7,
+            formalLastIndex: 36,
+            hiddenStart: 31,
+            hiddenEnd: 35,
+            totalFundingIndex: 29,
+            budgetAIndex: 26,
+            optionalOtherIndex: 13,
+            conditionalLandCostIndex: 21,
+            editableEndIndex: 30,
+            managerHeaders: ["項次", "案件名稱", "縣市", "鄉鎮市", "流域別", "溪別、區排或海岸名稱", "操作"]
+        }
+    };
+
+
+    function getAppendixClientConfig(
+        appendixType
+    ) {
+        return (
+            APPENDIX_CLIENT_CONFIG[
+                appendixType || "appendix1"
+            ] ||
+            APPENDIX_CLIENT_CONFIG.appendix1
+        );
+    }
+
 
     // =====================================================
     // 河川分署 → 中央管區域排水
@@ -3864,6 +4261,163 @@
     };
 
 
+    // 第一、四、八、九河川分署沒有轄管中央管區域排水。
+    // 前端用來避免誤選附表2，以及附表4～6的「區排」流域別。
+    const NO_REGIONAL_DRAINAGE_DIVISIONS =
+        new Set([
+            "1",
+            "4",
+            "8",
+            "9"
+        ]);
+
+
+    function hasNoRegionalDrainage(
+        divisionId
+    ) {
+
+        return NO_REGIONAL_DRAINAGE_DIVISIONS
+            .has(
+                String(
+                    divisionId || ""
+                )
+            );
+    }
+
+
+    function updateRegionalDrainageRestrictions() {
+
+        const divisionId =
+            String(
+                divisionSelect.value || ""
+            );
+
+        const restricted =
+            hasNoRegionalDrainage(
+                divisionId
+            );
+
+
+        // ---------------------------------
+        // 工程提報：附表2不得選擇
+        // ---------------------------------
+        const appendix2Option =
+            appendixTypeSelect
+                ? appendixTypeSelect.querySelector(
+                    'option[value="appendix2"]'
+                )
+                : null;
+
+        if (appendix2Option) {
+
+            // 第一、四、八、九分署直接不顯示附表2，
+            // 避免使用者誤以為仍可提報中央管區排案件。
+            appendix2Option.disabled =
+                restricted;
+
+            appendix2Option.hidden =
+                restricted;
+
+            appendix2Option.textContent =
+                "附表2－中央管區排整體改善";
+        }
+
+
+        // ---------------------------------
+        // 提報內容：附表2也要同步隱藏
+        // ---------------------------------
+        const businessAppendixSelect =
+            document.getElementById(
+                "businessAppendixType"
+            );
+
+        const businessAppendix2Option =
+            businessAppendixSelect
+                ? businessAppendixSelect.querySelector(
+                    'option[value="appendix2"]'
+                )
+                : null;
+
+        if (businessAppendix2Option) {
+            businessAppendix2Option.disabled =
+                restricted;
+
+            businessAppendix2Option.hidden =
+                restricted;
+        }
+
+        // 若管理模式原本正在查看附表2，
+        // 切換到第一、四、八、九分署時直接回到「全部附表」。
+        if (
+            restricted &&
+            businessAppendixSelect &&
+            businessAppendixSelect.value === "appendix2"
+        ) {
+            businessAppendixSelect.value =
+                "all";
+        }
+
+
+        // ---------------------------------
+        // 附表4～6：「流域別＝區排」不得選擇
+        // ---------------------------------
+        const regionalDrainageOption =
+            flowCategoryInput
+                ? flowCategoryInput.querySelector(
+                    'option[value="區排"]'
+                )
+                : null;
+
+        if (regionalDrainageOption) {
+
+            // 附表4～6同樣直接隱藏「區排」流域別。
+            regionalDrainageOption.disabled =
+                restricted;
+
+            regionalDrainageOption.hidden =
+                restricted;
+
+            regionalDrainageOption.textContent =
+                "區排";
+        }
+
+
+        // 若原本選到區排後才切換到不適用分署，立即清空，避免誤存。
+        if (
+            restricted &&
+            flowCategoryInput &&
+            flowCategoryInput.value ===
+                "區排"
+        ) {
+
+            flowCategoryInput.value =
+                "";
+
+            if (waterbodyNameInput) {
+                waterbodyNameInput.value =
+                    "";
+            }
+        }
+
+
+        const helper =
+            document.getElementById(
+                "waterbodyHelperText"
+            );
+
+        if (helper) {
+
+            helper.textContent =
+                restricted
+                    ? "本分署無轄管中央管區域排水，因此流域別不可選擇「區排」；選擇「河川」時系統會提供溪別名稱建議，選擇「海岸」時可直接輸入海岸名稱。"
+                    : "選擇「河川」或「區排」時，系統會依目前河川分署提供名稱建議；選擇「海岸」時可直接輸入海岸名稱。";
+        }
+
+
+        return restricted;
+    }
+
+
     function updateDrainageOptions(divisionId) {
 
         if (!drainageNameInput) {
@@ -3923,6 +4477,154 @@
     }
 
 
+
+    function updateWaterbodySuggestions() {
+
+        if (
+            !waterbodyNameInput ||
+            !waterbodyNameSuggestions
+        ) {
+            return;
+        }
+
+        waterbodyNameSuggestions.innerHTML = "";
+
+        const appendixType =
+            getCurrentAppendixType();
+
+        if (
+            appendixType !== "appendix4" &&
+            appendixType !== "appendix5" &&
+            appendixType !== "appendix6"
+        ) {
+            waterbodyNameInput.value = "";
+            waterbodyNameInput.disabled = true;
+            waterbodyNameInput.placeholder = "不適用";
+            return;
+        }
+
+        waterbodyNameInput.disabled = false;
+
+        const divisionId =
+            divisionSelect.value;
+
+        const flowType =
+            flowCategoryInput
+                ? flowCategoryInput.value
+                : "";
+
+        if (!flowType) {
+            waterbodyNameInput.placeholder =
+                "請先選擇流域別";
+            return;
+        }
+
+        if (!divisionId) {
+            waterbodyNameInput.placeholder =
+                "請先選擇河川分署";
+            return;
+        }
+
+        if (
+            flowType === "區排" &&
+            hasNoRegionalDrainage(
+                divisionId
+            )
+        ) {
+
+            flowCategoryInput.value =
+                "";
+
+            waterbodyNameInput.value =
+                "";
+
+            waterbodyNameInput.disabled =
+                true;
+
+            waterbodyNameInput.placeholder =
+                "本分署無轄管區域排水";
+
+            return;
+        }
+
+        let suggestions = [];
+
+        if (flowType === "河川") {
+
+            const systems =
+                divisionRiverSystems[
+                    divisionId
+                ] || [];
+
+            systems.forEach(
+                function(systemName) {
+
+                    const creeks =
+                        riverSystemCreeks[
+                            systemName
+                        ] || [];
+
+                    creeks.forEach(
+                        function(creekName) {
+                            if (
+                                suggestions.indexOf(
+                                    creekName
+                                ) === -1
+                            ) {
+                                suggestions.push(
+                                    creekName
+                                );
+                            }
+                        }
+                    );
+                }
+            );
+
+            waterbodyNameInput.placeholder =
+                "請選擇或輸入溪別名稱";
+
+        } else if (
+            flowType === "區排"
+        ) {
+
+            suggestions =
+                (
+                    divisionDrainages[
+                        divisionId
+                    ] || []
+                ).slice();
+
+            waterbodyNameInput.placeholder =
+                suggestions.length > 0
+                    ? "請選擇或輸入區排名稱"
+                    : "本分署目前無中央管區排建議，可自行輸入";
+
+        } else {
+
+            // 海岸名稱目前不自行猜測官方清單，保留自由輸入。
+            waterbodyNameInput.placeholder =
+                "請輸入海岸名稱";
+        }
+
+        suggestions.forEach(
+            function(name) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value = name;
+
+                waterbodyNameSuggestions
+                    .appendChild(
+                        option
+                    );
+            }
+        );
+    }
+
+
     function getCurrentAppendixType() {
         return appendixTypeSelect.value || "appendix1";
     }
@@ -3933,130 +4635,418 @@
         const appendixType =
             getCurrentAppendixType();
 
-        const isAppendix2 =
-            appendixType === "appendix2";
+        const config =
+            getAppendixClientConfig(
+                appendixType
+            );
 
         formAppendixTypeInput.value =
             appendixType;
 
+        entryFormTitle.textContent =
+            config.title;
 
-        document
-            .querySelectorAll(".appendix1-only")
-            .forEach(function(element) {
-                element.style.display =
-                    isAppendix2 ? "none" : "";
-            });
+        appendixPhaseNote.textContent =
+            "";
 
-        document
-            .querySelectorAll(".appendix2-only")
-            .forEach(function(element) {
-                element.style.display =
-                    isAppendix2 ? "" : "none";
-            });
+        showCaseManagerButton.disabled =
+            false;
+
+        showCaseManagerButton.title =
+            "";
 
 
-        if (isAppendix2) {
+        // ---------------------------------
+        // 各附表專用區塊顯示 / 隱藏
+        // ---------------------------------
 
-            entryFormTitle.textContent =
-                '附表2-「基礎設施防護-中央管區排整體改善」案件資料登錄';
+        const appendixClassMap = {
+            ".appendix1-only":
+                appendixType ===
+                "appendix1",
+            ".appendix2-only":
+                appendixType ===
+                "appendix2",
+            ".appendix3-only":
+                appendixType ===
+                "appendix3",
+            ".appendix456-only":
+                (
+                    appendixType ===
+                        "appendix4" ||
+                    appendixType ===
+                        "appendix5" ||
+                    appendixType ===
+                        "appendix6"
+                ),
+            ".appendix4-only":
+                appendixType ===
+                "appendix4",
+            ".appendix6-only":
+                appendixType ===
+                "appendix6",
+            ".appendix-levee-revetment":
+                (
+                    appendixType ===
+                        "appendix1" ||
+                    appendixType ===
+                        "appendix2" ||
+                    appendixType ===
+                        "appendix5" ||
+                    appendixType ===
+                        "appendix6"
+                ),
+            ".appendix-standard-benefit-area":
+                appendixType !==
+                "appendix4"
+        };
 
-            ecologySectionTitle.textContent =
-                "生態檢核";
+        Object.keys(
+            appendixClassMap
+        ).forEach(
+            function(selector) {
 
-            ecologyGrid.classList.remove("two-col");
-            ecologyGrid.classList.add("one-col");
+                document
+                    .querySelectorAll(
+                        selector
+                    )
+                    .forEach(
+                        function(element) {
+                            element.style.display =
+                                appendixClassMap[
+                                    selector
+                                ]
+                                    ? ""
+                                    : "none";
+                        }
+                    );
+            }
+        );
+
+
+        // ---------------------------------
+        // 生態檢核 / 小水力
+        // ---------------------------------
+
+        const isAppendix1 =
+            appendixType ===
+            "appendix1";
+
+        ecologySectionTitle.textContent =
+            isAppendix1
+                ? "生態檢核、小水力"
+                : "生態檢核";
+
+        ecologyGrid.classList.remove(
+            "one-col",
+            "two-col"
+        );
+
+        ecologyGrid.classList.add(
+            isAppendix1
+                ? "two-col"
+                : "one-col"
+        );
+
+        const hydroScoreInput =
+            document.getElementById(
+                "hydroScore"
+            );
+
+        if (hydroScoreInput) {
+
+            hydroScoreInput.disabled =
+                !isAppendix1;
+
+            if (!isAppendix1) {
+                hydroScoreInput.value =
+                    "";
+            }
+        }
+
+
+        // ---------------------------------
+        // 附表1：水系 / 溪別
+        // ---------------------------------
+
+        if (isAppendix1) {
+
+            updateRiverSystemOptions(
+                divisionSelect.value
+            );
+
+        } else {
+
+            if (
+                typeof riverSystemSelect !==
+                "undefined"
+            ) {
+                riverSystemSelect.value =
+                    "";
+                riverSystemSelect.disabled =
+                    true;
+            }
+
+            if (
+                typeof creekSelect !==
+                "undefined"
+            ) {
+                creekSelect.value = "";
+                creekSelect.disabled =
+                    true;
+            }
+        }
+
+
+        // ---------------------------------
+        // 附表2：排水名稱
+        // ---------------------------------
+
+        if (
+            appendixType ===
+            "appendix2"
+        ) {
 
             updateDrainageOptions(
                 divisionSelect.value
             );
 
-            // 附表2不使用水系、溪別及小水力欄位。
-            if (typeof riverSystemSelect !== "undefined") {
-                riverSystemSelect.value = "";
-                riverSystemSelect.disabled = true;
-            }
-
-            if (typeof creekSelect !== "undefined") {
-                creekSelect.value = "";
-                creekSelect.disabled = true;
-            }
-
-            const hydroScoreInput =
-                document.getElementById("hydroScore");
-
-            if (hydroScoreInput) {
-                hydroScoreInput.value = "";
-                hydroScoreInput.disabled = true;
-                hydroScoreInput.classList.remove(
-                    "required-field-error"
-                );
-            }
-
-            // 第二階段：附表2已支援新增、修改、刪除及工程線形管理。
-            showCaseManagerButton.disabled = false;
-            showCaseManagerButton.title = "";
-            appendixPhaseNote.textContent = "";
-
-        } else {
-
-            entryFormTitle.textContent =
-                '附表1-「基礎設施防護-中央管河川整體改善」案件資料登錄';
-
-            ecologySectionTitle.textContent =
-                "生態檢核、小水力";
-
-            ecologyGrid.classList.remove("one-col");
-            ecologyGrid.classList.add("two-col");
+        } else if (
+            drainageNameInput
+        ) {
 
             drainageNameInput.innerHTML =
                 '<option value="">不適用</option>';
-            drainageNameInput.disabled = true;
-            drainageNameInput.classList.remove(
-                "required-field-error"
-            );
 
-            const hydroScoreInput =
-                document.getElementById("hydroScore");
+            drainageNameInput.disabled =
+                true;
 
-            if (hydroScoreInput) {
-                hydroScoreInput.disabled = false;
-            }
+            drainageNameInput.value =
+                "";
+        }
 
-            showCaseManagerButton.disabled = false;
-            showCaseManagerButton.title = "";
-            appendixPhaseNote.textContent = "";
 
-            // 回附表1時，重新依目前分署建立水系清單。
+        // ---------------------------------
+        // 附表3：海岸名稱
+        // ---------------------------------
+
+        if (
+            coastNameInput
+        ) {
+
+            coastNameInput.disabled =
+                appendixType !==
+                "appendix3";
+
             if (
-                typeof updateRiverSystemOptions === "function" &&
-                typeof riverSystemSelect !== "undefined"
+                appendixType !==
+                "appendix3"
             ) {
-                updateRiverSystemOptions(
-                    divisionSelect.value
-                );
+                coastNameInput.value =
+                    "";
             }
         }
 
 
-        // 切換附表後清除附表專用欄位的紅框。
-        [
-            document.getElementById("riverSystem"),
-            document.getElementById("creek"),
-            document.getElementById("hydroScore"),
-            drainageNameInput
-        ].forEach(function(element) {
-            if (element) {
-                element.classList.remove(
-                    "required-field-error"
-                );
+        // ---------------------------------
+        // 附表4～6：流域別 / 名稱
+        // ---------------------------------
+
+        const isAppendix456 =
+            (
+                appendixType ===
+                    "appendix4" ||
+                appendixType ===
+                    "appendix5" ||
+                appendixType ===
+                    "appendix6"
+            );
+
+        if (
+            flowCategoryInput
+        ) {
+
+            flowCategoryInput.disabled =
+                !isAppendix456;
+
+            if (!isAppendix456) {
+                flowCategoryInput.value =
+                    "";
             }
-        });
+        }
+
+        if (
+            !isAppendix456 &&
+            waterbodyNameInput
+        ) {
+            waterbodyNameInput.value =
+                "";
+        }
+
+        updateRegionalDrainageRestrictions();
+        updateWaterbodySuggestions();
+
+
+        // ---------------------------------
+        // 提報工程內容專用欄位
+        // ---------------------------------
+
+        const leveeLengthInput =
+            document.getElementById(
+                "leveeLength"
+            );
+
+        const revetmentLengthInput =
+            document.getElementById(
+                "revetmentLength"
+            );
+
+        const useLeveeRevetment =
+            (
+                appendixType ===
+                    "appendix1" ||
+                appendixType ===
+                    "appendix2" ||
+                appendixType ===
+                    "appendix5" ||
+                appendixType ===
+                    "appendix6"
+            );
+
+        if (leveeLengthInput) {
+            leveeLengthInput.disabled =
+                !useLeveeRevetment;
+
+            if (!useLeveeRevetment) {
+                leveeLengthInput.value =
+                    "";
+            }
+        }
+
+        if (revetmentLengthInput) {
+            revetmentLengthInput.disabled =
+                !useLeveeRevetment;
+
+            if (!useLeveeRevetment) {
+                revetmentLengthInput.value =
+                    "";
+            }
+        }
+
+        if (leveeLengthLabel) {
+            leveeLengthLabel.textContent =
+                appendixType ===
+                "appendix6"
+                    ? "堤防(海堤)(公尺)"
+                    : "堤防(公尺)";
+        }
+
+
+        [
+            ["improvementArea",
+             appendixType ===
+                "appendix3"],
+            ["improvementLength",
+             appendixType ===
+                "appendix3"],
+            ["projectEnvLength",
+             appendixType ===
+                "appendix4"],
+            ["projectEnvArea",
+             appendixType ===
+                "appendix4"],
+            ["gateImprovementCount",
+             appendixType ===
+                "appendix6"],
+            ["floodRoadArea",
+             appendixType ===
+                "appendix6"],
+            ["ecoLandscapeArea",
+             appendixType ===
+                "appendix4"],
+            ["envImprovementArea",
+             appendixType !==
+                "appendix4"]
+        ].forEach(
+            function(item) {
+
+                const element =
+                    document.getElementById(
+                        item[0]
+                    );
+
+                if (!element) {
+                    return;
+                }
+
+                element.disabled =
+                    !item[1];
+
+                if (!item[1]) {
+                    element.value =
+                        "";
+                }
+            }
+        );
+
+
+        // 切換附表後清除專用欄位的紅框。
+        [
+            "riverSystem",
+            "creek",
+            "hydroScore",
+            "drainageName",
+            "coastName",
+            "flowCategory",
+            "waterbodyName",
+            "leveeLength",
+            "revetmentLength",
+            "improvementArea",
+            "improvementLength",
+            "projectEnvLength",
+            "projectEnvArea",
+            "gateImprovementCount",
+            "floodRoadArea",
+            "envImprovementArea",
+            "ecoLandscapeArea"
+        ].forEach(
+            function(id) {
+
+                const element =
+                    document.getElementById(
+                        id
+                    );
+
+                if (element) {
+                    element.classList.remove(
+                        "required-field-error"
+                    );
+                }
+            }
+        );
     }
 
 
     appendixTypeSelect.addEventListener(
         "change",
         function() {
+
+            if (
+                this.value ===
+                    "appendix2" &&
+                hasNoRegionalDrainage(
+                    divisionSelect.value
+                )
+            ) {
+
+                this.value =
+                    "appendix1";
+
+                alert(
+                    "第一、第四、第八及第九河川分署無轄管中央管區域排水，因此不適用附表2。"
+                );
+            }
+
             // 切換附表時回到「新增案件」狀態，避免不同附表的欄位資料互相殘留。
             resetCaseFormForCreate();
         }
@@ -4081,8 +5071,13 @@
 
 
     function getDivisionIdByName(name) {
+        const text = String(name || "").trim();
+
         return Object.keys(divisions).find(function(id) {
-            return divisions[id].name === name;
+            return (
+                divisions[id].name === text ||
+                divisions[id].shortName === text
+            );
         }) || "";
     }
 
@@ -4212,25 +5207,36 @@
 
     function getCaseManagerConfig() {
 
-        if (getCurrentAppendixType() === "appendix2") {
-            return {
-                appendixType: "appendix2",
-                caseIdIndex: 34,
-                caseNameIndex: 6,
-                countyIndex: 3,
-                townshipIndex: 4,
-                drainageIndex: 5
-            };
-        }
+        const appendixType =
+            getCurrentAppendixType();
+
+        const base =
+            getAppendixClientConfig(
+                appendixType
+            );
+
+        const valueIndexes = {
+            appendix1: [7, 3, 4, 5, 6],
+            appendix2: [6, 3, 4, 5],
+            appendix3: [6, 3, 4, 5],
+            appendix4: [7, 3, 4, 5, 6],
+            appendix5: [7, 3, 4, 5, 6],
+            appendix6: [7, 3, 4, 5, 6]
+        };
 
         return {
-            appendixType: "appendix1",
-            caseIdIndex: 36,
-            caseNameIndex: 7,
+            appendixType:
+                appendixType,
+            caseIdIndex:
+                base.caseIdIndex,
+            caseNameIndex:
+                base.caseNameIndex,
             countyIndex: 3,
             townshipIndex: 4,
-            riverSystemIndex: 5,
-            creekIndex: 6
+            valueIndexes:
+                valueIndexes[
+                    appendixType
+                ] || valueIndexes.appendix1
         };
     }
 
@@ -4241,28 +5247,25 @@
             return;
         }
 
-        if (getCurrentAppendixType() === "appendix2") {
-            caseManagerHead.innerHTML =
-                '<tr>' +
-                '<th>項次</th>' +
-                '<th>案件名稱</th>' +
-                '<th>縣市</th>' +
-                '<th>鄉鎮市</th>' +
-                '<th>排水名稱</th>' +
-                '<th>操作</th>' +
-                '</tr>';
-        } else {
-            caseManagerHead.innerHTML =
-                '<tr>' +
-                '<th>項次</th>' +
-                '<th>案件名稱</th>' +
-                '<th>縣市</th>' +
-                '<th>鄉鎮市</th>' +
-                '<th>水系</th>' +
-                '<th>溪別</th>' +
-                '<th>操作</th>' +
-                '</tr>';
-        }
+        const config =
+            getAppendixClientConfig(
+                getCurrentAppendixType()
+            );
+
+        caseManagerHead.innerHTML =
+            '<tr>' +
+            config.managerHeaders
+                .map(
+                    function(header) {
+                        return (
+                            '<th>' +
+                            header +
+                            '</th>'
+                        );
+                    }
+                )
+                .join('') +
+            '</tr>';
     }
 
 
@@ -4363,23 +5366,17 @@
 
             const tr = document.createElement("tr");
 
-            const values =
-                config.appendixType === "appendix2"
-                    ? [
-                        index + 1,
-                        row[config.caseNameIndex] || "",
-                        row[config.countyIndex] || "",
-                        row[config.townshipIndex] || "",
-                        row[config.drainageIndex] || ""
-                    ]
-                    : [
-                        index + 1,
-                        row[config.caseNameIndex] || "",
-                        row[config.countyIndex] || "",
-                        row[config.townshipIndex] || "",
-                        row[config.riverSystemIndex] || "",
-                        row[config.creekIndex] || ""
-                    ];
+            const values = [
+                index + 1,
+                ...config.valueIndexes.map(
+                    function(columnIndex) {
+                        return (
+                            row[columnIndex] ||
+                            ""
+                        );
+                    }
+                )
+            ];
 
             values.forEach(function(value) {
                 const td = document.createElement("td");
@@ -4419,87 +5416,118 @@
 
     function editExistingCase(index) {
 
-        const row = caseManagerRows[index];
-        if (!row) return;
+        const row =
+            caseManagerRows[
+                index
+            ];
+
+        if (!row) {
+            return;
+        }
 
         const appendixType =
             getCurrentAppendixType();
 
-        const isAppendix2 =
-            appendixType === "appendix2";
+        const config =
+            getAppendixClientConfig(
+                appendixType
+            );
 
         const caseId =
-            isAppendix2
-                ? (row[34] || "")
-                : (row[36] || "");
+            row[
+                config.caseIdIndex
+            ] || "";
 
         const caseName =
-            isAppendix2
-                ? (row[6] || "")
-                : (row[7] || "");
+            row[
+                config.caseNameIndex
+            ] || "";
 
         if (!caseId) {
-            alert("此案件尚未取得系統案件ID，請重新載入案件後再試一次。");
+            alert(
+                "此案件尚未取得系統案件ID，請重新載入案件後再試一次。"
+            );
             return;
         }
 
-        currentEditingCaseId = caseId;
-        caseIdInput.value = caseId;
-        operationInput.value = "update";
-        lineChangedInput.value = "0";
-        formAppendixTypeInput.value = appendixType;
 
-        const divisionId = getDivisionIdByName(row[2]);
+        // 先清空上一筆案件可能殘留的附表專用欄位。
+        businessForm.reset();
+
+        formAppendixTypeInput.value =
+            appendixType;
+
+        updateAppendixForm();
+
+
+        currentEditingCaseId =
+            caseId;
+
+        caseIdInput.value =
+            caseId;
+
+        operationInput.value =
+            "update";
+
+        lineChangedInput.value =
+            "0";
+
+
+        const divisionId =
+            getDivisionIdByName(
+                row[2]
+            );
+
         if (divisionId) {
-            divisionSelect.value = divisionId;
+            divisionSelect.value =
+                divisionId;
         }
 
         syncDivisionToForm();
-        updateCountyOptions(divisionSelect.value);
-        countySelect.value = row[3] || "";
-        countySelect.dispatchEvent(new Event("change"));
-        townshipSelect.value = row[4] || "";
 
-        if (isAppendix2) {
+        updateCountyOptions(
+            divisionSelect.value
+        );
 
-            updateDrainageOptions(divisionSelect.value);
-            drainageNameInput.value = row[5] || "";
+        countySelect.value =
+            row[3] || "";
 
-            setFieldValue("category", row[1]);
-            updateLandAcquisitionCostState();
-            setFieldValue("caseName", row[6]);
-            setFieldValue("structureName", row[7]);
-            setFieldValue("leveeLength", row[8]);
-            setFieldValue("revetmentLength", row[9]);
-            setFieldValue("otherWork", row[10]);
-            setFieldValue("protectedArea", row[11]);
-            setFieldValue("protectedPopulation", row[12]);
-            setFieldValue("ecoLandscapeLength", row[13]);
-            setFieldValue("envImprovementArea", row[14]);
-            setFieldValue("ecologyCheck", row[15]);
-            setFieldValue("hydroScore", "");
+        countySelect.dispatchEvent(
+            new Event("change")
+        );
 
-            setFieldValue("landStatus", row[17]);
-            setFieldValue("landAcquisitionCost", row[18]);
-            setFieldValue("marketValuationSubmitted", row[19]);
-            setFieldValue("plannedStart", dateForInput(row[20]));
-            setFieldValue("plannedFinish", dateForInput(row[21]));
-            updatePlannedDuration();
-            setFieldValue("budget116", row[23]);
-            setFieldValue("budget117", row[24]);
-            setFieldValue("budget118", row[25]);
-            setFieldValue("estimatedCarbon", row[27]);
-            setFieldValue("remarks", row[33]);
+        townshipSelect.value =
+            row[4] || "";
 
-        } else {
 
-            updateRiverSystemOptions(divisionSelect.value);
-            riverSystemSelect.value = row[5] || "";
-            updateCreekOptions(row[5] || "");
-            creekSelect.value = row[6] || "";
+        // 共通欄位
+        setFieldValue(
+            "category",
+            row[1]
+        );
 
-            setFieldValue("category", row[1]);
-            updateLandAcquisitionCostState();
+        updateLandAcquisitionCostState();
+
+
+        if (
+            appendixType ===
+            "appendix1"
+        ) {
+
+            updateRiverSystemOptions(
+                divisionSelect.value
+            );
+
+            riverSystemSelect.value =
+                row[5] || "";
+
+            updateCreekOptions(
+                row[5] || ""
+            );
+
+            creekSelect.value =
+                row[6] || "";
+
             setFieldValue("caseName", row[7]);
             setFieldValue("structureName", row[8]);
             setFieldValue("leveeLength", row[9]);
@@ -4523,54 +5551,304 @@
             setFieldValue("budget118", row[27]);
             setFieldValue("estimatedCarbon", row[29]);
             setFieldValue("remarks", row[35]);
+
+        } else if (
+            appendixType ===
+            "appendix2"
+        ) {
+
+            updateDrainageOptions(
+                divisionSelect.value
+            );
+
+            drainageNameInput.value =
+                row[5] || "";
+
+            setFieldValue("caseName", row[6]);
+            setFieldValue("structureName", row[7]);
+            setFieldValue("leveeLength", row[8]);
+            setFieldValue("revetmentLength", row[9]);
+            setFieldValue("otherWork", row[10]);
+            setFieldValue("protectedArea", row[11]);
+            setFieldValue("protectedPopulation", row[12]);
+            setFieldValue("ecoLandscapeLength", row[13]);
+            setFieldValue("envImprovementArea", row[14]);
+            setFieldValue("ecologyCheck", row[15]);
+
+            setFieldValue("landStatus", row[17]);
+            setFieldValue("landAcquisitionCost", row[18]);
+            setFieldValue("marketValuationSubmitted", row[19]);
+            setFieldValue("plannedStart", dateForInput(row[20]));
+            setFieldValue("plannedFinish", dateForInput(row[21]));
+            updatePlannedDuration();
+            setFieldValue("budget116", row[23]);
+            setFieldValue("budget117", row[24]);
+            setFieldValue("budget118", row[25]);
+            setFieldValue("estimatedCarbon", row[27]);
+            setFieldValue("remarks", row[33]);
+
+        } else if (
+            appendixType ===
+            "appendix3"
+        ) {
+
+            setFieldValue("coastName", row[5]);
+            setFieldValue("caseName", row[6]);
+            setFieldValue("structureName", row[7]);
+            setFieldValue("improvementArea", row[8]);
+            setFieldValue("improvementLength", row[9]);
+            setFieldValue("otherWork", row[10]);
+            setFieldValue("protectedArea", row[11]);
+            setFieldValue("protectedPopulation", row[12]);
+            setFieldValue("ecoLandscapeLength", row[13]);
+            setFieldValue("envImprovementArea", row[14]);
+            setFieldValue("ecologyCheck", row[15]);
+
+            setFieldValue("landStatus", row[17]);
+            setFieldValue("landAcquisitionCost", row[18]);
+            setFieldValue("marketValuationSubmitted", row[19]);
+            setFieldValue("plannedStart", dateForInput(row[20]));
+            setFieldValue("plannedFinish", dateForInput(row[21]));
+            updatePlannedDuration();
+            setFieldValue("budget116", row[23]);
+            setFieldValue("budget117", row[24]);
+            setFieldValue("budget118", row[25]);
+            setFieldValue("estimatedCarbon", row[27]);
+            setFieldValue("remarks", row[33]);
+
+        } else if (
+            appendixType ===
+            "appendix4"
+        ) {
+
+            setFieldValue("flowCategory", row[5]);
+            updateWaterbodySuggestions();
+            setFieldValue("waterbodyName", row[6]);
+            setFieldValue("caseName", row[7]);
+            setFieldValue("structureName", row[8]);
+            setFieldValue("projectEnvLength", row[9]);
+            setFieldValue("projectEnvArea", row[10]);
+            setFieldValue("otherWork", row[11]);
+            setFieldValue("protectedArea", row[12]);
+            setFieldValue("protectedPopulation", row[13]);
+            setFieldValue("ecoLandscapeLength", row[14]);
+            setFieldValue("ecoLandscapeArea", row[15]);
+            setFieldValue("ecologyCheck", row[16]);
+
+            setFieldValue("landStatus", row[18]);
+            setFieldValue("landAcquisitionCost", row[19]);
+            setFieldValue("marketValuationSubmitted", row[20]);
+            setFieldValue("plannedStart", dateForInput(row[21]));
+            setFieldValue("plannedFinish", dateForInput(row[22]));
+            updatePlannedDuration();
+            setFieldValue("budget116", row[24]);
+            setFieldValue("budget117", row[25]);
+            setFieldValue("budget118", row[26]);
+            setFieldValue("estimatedCarbon", row[28]);
+            setFieldValue("remarks", row[34]);
+
+        } else if (
+            appendixType ===
+            "appendix5"
+        ) {
+
+            setFieldValue("flowCategory", row[5]);
+            updateWaterbodySuggestions();
+            setFieldValue("waterbodyName", row[6]);
+            setFieldValue("caseName", row[7]);
+            setFieldValue("structureName", row[8]);
+            setFieldValue("leveeLength", row[9]);
+            setFieldValue("revetmentLength", row[10]);
+            setFieldValue("otherWork", row[11]);
+            setFieldValue("protectedArea", row[12]);
+            setFieldValue("protectedPopulation", row[13]);
+            setFieldValue("ecoLandscapeLength", row[14]);
+            setFieldValue("envImprovementArea", row[15]);
+            setFieldValue("ecologyCheck", row[16]);
+
+            setFieldValue("landStatus", row[18]);
+            setFieldValue("landAcquisitionCost", row[19]);
+            setFieldValue("marketValuationSubmitted", row[20]);
+            setFieldValue("plannedStart", dateForInput(row[21]));
+            setFieldValue("plannedFinish", dateForInput(row[22]));
+            updatePlannedDuration();
+            setFieldValue("budget116", row[24]);
+            setFieldValue("budget117", row[25]);
+            setFieldValue("budget118", row[26]);
+            setFieldValue("estimatedCarbon", row[28]);
+            setFieldValue("remarks", row[34]);
+
+        } else if (
+            appendixType ===
+            "appendix6"
+        ) {
+
+            setFieldValue("flowCategory", row[5]);
+            updateWaterbodySuggestions();
+            setFieldValue("waterbodyName", row[6]);
+            setFieldValue("caseName", row[7]);
+            setFieldValue("structureName", row[8]);
+            setFieldValue("leveeLength", row[9]);
+            setFieldValue("revetmentLength", row[10]);
+            setFieldValue("gateImprovementCount", row[11]);
+            setFieldValue("floodRoadArea", row[12]);
+            setFieldValue("otherWork", row[13]);
+            setFieldValue("protectedArea", row[14]);
+            setFieldValue("protectedPopulation", row[15]);
+            setFieldValue("ecoLandscapeLength", row[16]);
+            setFieldValue("envImprovementArea", row[17]);
+            setFieldValue("ecologyCheck", row[18]);
+
+            setFieldValue("landStatus", row[20]);
+            setFieldValue("landAcquisitionCost", row[21]);
+            setFieldValue("marketValuationSubmitted", row[22]);
+            setFieldValue("plannedStart", dateForInput(row[23]));
+            setFieldValue("plannedFinish", dateForInput(row[24]));
+            updatePlannedDuration();
+            setFieldValue("budget116", row[26]);
+            setFieldValue("budget117", row[27]);
+            setFieldValue("budget118", row[28]);
+            setFieldValue("estimatedCarbon", row[30]);
+            setFieldValue("remarks", row[36]);
         }
+
 
         updateTotalFunding();
 
         resetLineStateSilently();
-        lineChangedInput.value = "0";
-        loadLineForEdit(row);
 
-        businessForm.style.display = "block";
-        caseManagerPanel.classList.remove("show");
-        saveCaseButton.textContent = "儲存修改";
-        cancelEditButton.style.display = "inline-block";
-        editModeStatus.textContent = "正在修改：" + (caseName || "未命名案件");
-        newCaseButton.classList.remove("active-mode");
-        showCaseManagerButton.classList.remove("active-mode");
-        saveMessage.textContent = "";
+        lineChangedInput.value =
+            "0";
+
+        loadLineForEdit(
+            row
+        );
+
+
+        businessForm.style.display =
+            "block";
+
+        caseManagerPanel.classList.remove(
+            "show"
+        );
+
+        saveCaseButton.textContent =
+            "儲存修改";
+
+        cancelEditButton.style.display =
+            "inline-block";
+
+        editModeStatus.textContent =
+            "正在修改：" +
+            (
+                caseName ||
+                "未命名案件"
+            );
+
+        newCaseButton.classList.remove(
+            "active-mode"
+        );
+
+        showCaseManagerButton.classList.remove(
+            "active-mode"
+        );
+
+        saveMessage.textContent =
+            "";
+
         window.scrollTo({
-            top: document.getElementById("dataEntryPage").offsetTop,
-            behavior: "smooth"
+            top:
+                document
+                    .getElementById(
+                        "dataEntryPage"
+                    )
+                    .offsetTop,
+            behavior:
+                "smooth"
         });
     }
 
 
     function loadLineForEdit(row) {
 
-        const oldScript = document.getElementById("editLineJsonp");
-        if (oldScript) oldScript.remove();
+        const oldScript =
+            document.getElementById(
+                "editLineJsonp"
+            );
 
-        const isAppendix2 =
-            getCurrentAppendixType() === "appendix2";
+        if (oldScript) {
+            oldScript.remove();
+        }
+
+        const appendixType =
+            getCurrentAppendixType();
+
+        const config =
+            getAppendixClientConfig(
+                appendixType
+            );
 
         const caseId =
-            isAppendix2 ? (row[34] || "") : (row[36] || "");
+            row[
+                config.caseIdIndex
+            ] || "";
 
         const caseName =
-            isAppendix2 ? (row[6] || "") : (row[7] || "");
+            row[
+                config.caseNameIndex
+            ] || "";
 
-        const riverSystem =
-            isAppendix2 ? "" : (row[5] || "");
+        let riverSystem = "";
+        let creek = "";
+        let drainageName = "";
+        let coastName = "";
+        let flowCategory = "";
+        let waterbodyName = "";
 
-        const creek =
-            isAppendix2 ? "" : (row[6] || "");
+        if (
+            appendixType ===
+            "appendix1"
+        ) {
 
-        const drainageName =
-            isAppendix2 ? (row[5] || "") : "";
+            riverSystem =
+                row[5] || "";
 
-        const script = document.createElement("script");
-        script.id = "editLineJsonp";
+            creek =
+                row[6] || "";
+
+        } else if (
+            appendixType ===
+            "appendix2"
+        ) {
+
+            drainageName =
+                row[5] || "";
+
+        } else if (
+            appendixType ===
+            "appendix3"
+        ) {
+
+            coastName =
+                row[5] || "";
+
+        } else {
+
+            flowCategory =
+                row[5] || "";
+
+            waterbodyName =
+                row[6] || "";
+        }
+
+        const script =
+            document.createElement(
+                "script"
+            );
+
+        script.id =
+            "editLineJsonp";
+
         script.src =
             GAS_URL +
             "?action=readLine" +
@@ -4580,20 +5858,59 @@
             ) +
             "&appendixType=" +
             encodeURIComponent(
-                getCurrentAppendixType()
+                appendixType
             ) +
-            "&caseId=" + encodeURIComponent(caseId) +
-            "&division=" + encodeURIComponent(row[2] || "") +
-            "&county=" + encodeURIComponent(row[3] || "") +
-            "&township=" + encodeURIComponent(row[4] || "") +
-            "&riverSystem=" + encodeURIComponent(riverSystem) +
-            "&creek=" + encodeURIComponent(creek) +
-            "&drainageName=" + encodeURIComponent(drainageName) +
-            "&caseName=" + encodeURIComponent(caseName) +
+            "&caseId=" +
+            encodeURIComponent(
+                caseId
+            ) +
+            "&division=" +
+            encodeURIComponent(
+                row[2] || ""
+            ) +
+            "&county=" +
+            encodeURIComponent(
+                row[3] || ""
+            ) +
+            "&township=" +
+            encodeURIComponent(
+                row[4] || ""
+            ) +
+            "&riverSystem=" +
+            encodeURIComponent(
+                riverSystem
+            ) +
+            "&creek=" +
+            encodeURIComponent(
+                creek
+            ) +
+            "&drainageName=" +
+            encodeURIComponent(
+                drainageName
+            ) +
+            "&coastName=" +
+            encodeURIComponent(
+                coastName
+            ) +
+            "&flowCategory=" +
+            encodeURIComponent(
+                flowCategory
+            ) +
+            "&waterbodyName=" +
+            encodeURIComponent(
+                waterbodyName
+            ) +
+            "&caseName=" +
+            encodeURIComponent(
+                caseName
+            ) +
             "&callback=handleEditLineData" +
-            "&_=" + Date.now();
+            "&_=" +
+            Date.now();
 
-        document.body.appendChild(script);
+        document.body.appendChild(
+            script
+        );
     }
 
 
@@ -4624,29 +5941,52 @@
 
     function deleteExistingCase(index) {
 
-        const row = caseManagerRows[index];
-        if (!row) return;
+        const row =
+            caseManagerRows[
+                index
+            ];
 
-        const isAppendix2 =
-            getCurrentAppendixType() === "appendix2";
-
-        const caseId =
-            isAppendix2 ? (row[34] || "") : (row[36] || "");
-
-        const caseName =
-            isAppendix2 ? (row[6] || "未命名案件") : (row[7] || "未命名案件");
-
-        if (!caseId) {
-            alert("此案件缺少案件ID，請重新載入後再試一次。");
+        if (!row) {
             return;
         }
 
-        const ok = confirm(
-            "確定要刪除「" + caseName + "」嗎？\n\n" +
-            "案件會從正式附表與線形資料中移除，但系統會先備份到 Google Sheet 的「刪除紀錄」工作表。"
-        );
+        const appendixType =
+            getCurrentAppendixType();
 
-        if (!ok) return;
+        const config =
+            getAppendixClientConfig(
+                appendixType
+            );
+
+        const caseId =
+            row[
+                config.caseIdIndex
+            ] || "";
+
+        const caseName =
+            row[
+                config.caseNameIndex
+            ] ||
+            "未命名案件";
+
+        if (!caseId) {
+            alert(
+                "此案件缺少案件ID，請重新載入後再試一次。"
+            );
+            return;
+        }
+
+        const ok =
+            confirm(
+                "確定要刪除「" +
+                caseName +
+                "」嗎？\n\n" +
+                "案件會從正式附表與線形資料中移除，但系統會先備份到 Google Sheet 的「刪除紀錄」工作表。"
+            );
+
+        if (!ok) {
+            return;
+        }
 
         const token =
             getAuthToken();
@@ -4661,16 +6001,22 @@
         deleteCaseIdInput.value =
             caseId;
 
-        document.getElementById(
-            "deleteAuthToken"
-        ).value = token;
+        document
+            .getElementById(
+                "deleteAuthToken"
+            )
+            .value =
+            token;
 
-        if (deleteAppendixTypeInput) {
+        if (
+            deleteAppendixTypeInput
+        ) {
             deleteAppendixTypeInput.value =
-                getCurrentAppendixType();
+                appendixType;
         }
 
-        deleteSubmitted = true;
+        deleteSubmitted =
+            true;
 
         caseManagerStatus.textContent =
             "正在刪除「" +
@@ -4690,15 +6036,12 @@
         { id: "caseName", label: "案件名稱" },
 
         { id: "structureName", label: "建造物名稱" },
-        { id: "leveeLength", label: "堤防(公尺)" },
-        { id: "revetmentLength", label: "護岸(公尺)" },
 
         // otherWork「其他(請說明)」刻意不放
 
         { id: "protectedArea", label: "保護面積(公頃)" },
         { id: "protectedPopulation", label: "保護人口數(千人)" },
         { id: "ecoLandscapeLength", label: "生態友善及地景營造長度(公尺)" },
-        { id: "envImprovementArea", label: "整體環境改善面積(公頃)" },
 
         { id: "ecologyCheck", label: "是否辦理核定階段生態檢核" },
 
@@ -4712,9 +6055,12 @@
         { id: "plannedFinish", label: "預定完工日期" },
         { id: "plannedDuration", label: "預定工期(月)" },
 
-        { id: "budget116", label: "116年預估使用經費" },
-        { id: "budget117", label: "117年預估使用經費" },
-        { id: "budget118", label: "118年以後預估使用經費" },
+        // 為避免大幅改動既有後端參數名稱，
+        // 這三個 input id 仍沿用 budget116 / 117 / 118，
+        // 但畫面與 Excel 對應為 115 / 116 / 117 年。
+        { id: "budget116", label: "115年預估使用經費" },
+        { id: "budget117", label: "116年預估使用經費" },
+        { id: "budget118", label: "117年預估使用經費" },
 
         { id: "totalFunding", label: "經費需求" },
         { id: "estimatedCarbon", label: "預估碳排量" }
@@ -4728,11 +6074,50 @@
         appendix1: [
             { id: "riverSystem", label: "水系" },
             { id: "creek", label: "溪別" },
+            { id: "leveeLength", label: "堤防(公尺)" },
+            { id: "revetmentLength", label: "護岸(公尺)" },
+            { id: "envImprovementArea", label: "整體環境改善面積(公頃)" },
             { id: "hydroScore", label: "河川小水力發電潛力案場初評結果" }
         ],
 
         appendix2: [
-            { id: "drainageName", label: "排水名稱" }
+            { id: "drainageName", label: "排水名稱" },
+            { id: "leveeLength", label: "堤防(公尺)" },
+            { id: "revetmentLength", label: "護岸(公尺)" },
+            { id: "envImprovementArea", label: "整體環境改善面積(公頃)" }
+        ],
+
+        appendix3: [
+            { id: "coastName", label: "海岸名稱" },
+            { id: "improvementArea", label: "改善面積(公頃)" },
+            { id: "improvementLength", label: "改善長度(公尺)" },
+            { id: "envImprovementArea", label: "整體環境改善面積(公頃)" }
+        ],
+
+        appendix4: [
+            { id: "flowCategory", label: "流域別" },
+            { id: "waterbodyName", label: "溪別、區排或海岸名稱" },
+            { id: "projectEnvLength", label: "整體環境改善長度(公尺)" },
+            { id: "projectEnvArea", label: "整體環境改善面積(公頃)" },
+            { id: "ecoLandscapeArea", label: "生態友善及地景營造面積(公頃)" }
+        ],
+
+        appendix5: [
+            { id: "flowCategory", label: "流域別" },
+            { id: "waterbodyName", label: "溪別、區排或海岸名稱" },
+            { id: "leveeLength", label: "堤防(公尺)" },
+            { id: "revetmentLength", label: "護岸(公尺)" },
+            { id: "envImprovementArea", label: "整體環境改善面積(公頃)" }
+        ],
+
+        appendix6: [
+            { id: "flowCategory", label: "流域別" },
+            { id: "waterbodyName", label: "溪別、區排或海岸名稱" },
+            { id: "leveeLength", label: "堤防(海堤)(公尺)" },
+            { id: "revetmentLength", label: "護岸(公尺)" },
+            { id: "gateImprovementCount", label: "水門更新改善(座)" },
+            { id: "floodRoadArea", label: "水防道路維護(平方公尺)" },
+            { id: "envImprovementArea", label: "整體環境改善面積(公頃)" }
         ]
     };
 
@@ -4740,7 +6125,11 @@
     const ALL_REQUIRED_CASE_FIELDS = [
         ...COMMON_REQUIRED_CASE_FIELDS,
         ...APPENDIX_REQUIRED_FIELDS.appendix1,
-        ...APPENDIX_REQUIRED_FIELDS.appendix2
+        ...APPENDIX_REQUIRED_FIELDS.appendix2,
+        ...APPENDIX_REQUIRED_FIELDS.appendix3,
+        ...APPENDIX_REQUIRED_FIELDS.appendix4,
+        ...APPENDIX_REQUIRED_FIELDS.appendix5,
+        ...APPENDIX_REQUIRED_FIELDS.appendix6
     ];
 
 
@@ -4979,7 +6368,7 @@
     });
 
     // -------------------------
-    // 讀取提報內容（第三階段：附表1 / 附表2切換）
+    // 讀取提報內容（附表1～附表6切換）
     // -------------------------
     const businessDataBody = document.getElementById("businessDataBody");
     const businessDataHead = document.getElementById("businessDataHead");
@@ -4987,7 +6376,85 @@
     const businessAppendixTypeSelect = document.getElementById("businessAppendixType");
     const dataStatus = document.getElementById("dataStatus");
     const refreshDataButton = document.getElementById("refreshDataButton");
+    const meetingExcelExportButton =
+        document.getElementById("meetingExcelExportButton");
+    const meetingExcelExportStatus =
+        document.getElementById("meetingExcelExportStatus");
+    let meetingExcelExportTimer = null;
     let dataLoadTimer = null;
+
+    const startCaseOrderButton =
+        document.getElementById("startCaseOrderButton");
+    const saveCaseOrderButton =
+        document.getElementById("saveCaseOrderButton");
+    const cancelCaseOrderButton =
+        document.getElementById("cancelCaseOrderButton");
+    const caseOrderStatus =
+        document.getElementById("caseOrderStatus");
+
+    let currentBusinessRows = [];
+    let currentBusinessAppendixType = "appendix1";
+    let businessCaseOrderMode = false;
+    let draggedBusinessRow = null;
+    let caseOrderSaveTimer = null;
+
+    const singleAppendixTableWrap =
+        document.getElementById("singleAppendixTableWrap");
+
+    const allAppendicesView =
+        document.getElementById("allAppendicesView");
+
+    let allAppendixRequestSerial = 0;
+
+
+    function isAllBusinessAppendicesMode() {
+        return getCurrentBusinessAppendixType() === "all";
+    }
+
+
+    function getBusinessAppendixTypesForCurrentDivision() {
+
+        const types = [
+            "appendix1",
+            "appendix2",
+            "appendix3",
+            "appendix4",
+            "appendix5",
+            "appendix6"
+        ];
+
+        // 第一、四、八、九分署沒有中央管區排，
+        // 「全部附表」總覽直接略過不適用的附表2。
+        if (
+            hasNoRegionalDrainage(
+                divisionSelect.value
+            )
+        ) {
+            return types.filter(function(type) {
+                return type !== "appendix2";
+            });
+        }
+
+        return types;
+    }
+
+
+    function setBusinessContentMode(allMode) {
+
+        if (singleAppendixTableWrap) {
+            singleAppendixTableWrap.style.display =
+                allMode ? "none" : "block";
+        }
+
+        if (allAppendicesView) {
+            allAppendicesView.style.display =
+                allMode ? "block" : "none";
+
+            if (!allMode) {
+                allAppendicesView.innerHTML = "";
+            }
+        }
+    }
 
 
     function getCurrentBusinessAppendixType() {
@@ -4997,66 +6464,62 @@
 
     function updateBusinessDataTitle() {
 
-        if (getCurrentBusinessAppendixType() === "appendix2") {
+        if (isAllBusinessAppendicesMode()) {
+            const divisionName =
+                divisions[divisionSelect.value]
+                    ? divisions[divisionSelect.value].name
+                    : "";
+
             businessDataTitle.textContent =
-                '附表2-「基礎設施防護-中央管區排整體改善」案件明細表';
-        } else {
-            businessDataTitle.textContent =
-                '附表1-「基礎設施防護-中央管河川整體改善」案件明細表';
+                (divisionName ? divisionName + "－" : "") +
+                "附表1至附表6案件彙整總覽";
+
+            return;
         }
+
+        const config =
+            getAppendixClientConfig(
+                getCurrentBusinessAppendixType()
+            );
+
+        businessDataTitle.textContent =
+            config.businessTitle;
     }
 
 
     function renderBusinessDataHead() {
 
-        if (getCurrentBusinessAppendixType() === "appendix2") {
+        const appendixType =
+            getCurrentBusinessAppendixType();
+
+        if (appendixType === "all") {
+            businessDataHead.innerHTML = "";
+            return;
+        }
+
+        const commonCategoryHeader =
+            '類別<br>(工程、用地先期、用地取得、委託測設監造、橋梁改建)';
+
+        const commonLandHeaders =
+            '<th>A：已完成用地先期作業，接續辦理用地取得<br>B：已取得用地，接續辦理之工程<br>C：辦理取得用地中，且接續辦理之工程<br>D：其他(請說明)</th>' +
+            '<th>預估用地取得經費(千元)<br>(僅類別屬用地先期需填列)</th>' +
+            '<th>用地案是否已送評定市價<br>(是/否)</th>';
+
+        const commonBudgetHeaders =
+            '<th>115年<br>(A)</th>' +
+            '<th>116年<br>(B)</th>' +
+            '<th>117年<br>(C)</th>';
+
+
+        if (
+            appendixType ===
+            "appendix1"
+        ) {
 
             businessDataHead.innerHTML = `
                 <tr>
                     <th rowspan="2">項次</th>
-                    <th rowspan="2">類別<br>(工程、用地先期、用地取得、委託測設監造、橋梁改建)</th>
-                    <th rowspan="2">分署別</th>
-                    <th rowspan="2">縣市</th>
-                    <th rowspan="2">鄉鎮市</th>
-                    <th rowspan="2">排水名稱</th>
-                    <th rowspan="2">案件名稱</th>
-                    <th colspan="4">提報工程內容</th>
-                    <th colspan="4">預期工程效益</th>
-                    <th rowspan="2">是否辦理核定階段生態檢核<br>(是/否)</th>
-                    <th rowspan="2">座標點位<br>(TWD97，經緯度)</th>
-                    <th colspan="3">用地辦理情形</th>
-                    <th rowspan="2">預定開工日期<br>(年/月/日)</th>
-                    <th rowspan="2">預定完工日期<br>(年/月/日)</th>
-                    <th rowspan="2">預定工期<br>(月)</th>
-                    <th colspan="3">年度預估使用經費(千元)</th>
-                    <th rowspan="2">經費需求(千元)<br>(D=A+B+C)</th>
-                    <th rowspan="2">預估碳排量(tCO2e)</th>
-                    <th rowspan="2">備註(請填列關切人員或長官交辦紀錄等)</th>
-                </tr>
-                <tr>
-                    <th>建造物名稱</th>
-                    <th>堤防<br>(公尺)</th>
-                    <th>護岸<br>(公尺)</th>
-                    <th>其他<br>(請說明)</th>
-                    <th>保護面積<br>(公頃)</th>
-                    <th>保護人口數<br>(千人)</th>
-                    <th>生態友善及地景營造長度<br>(公尺)</th>
-                    <th>整體環境改善面積<br>(公頃)</th>
-                    <th>A：已完成用地先期作業，接續辦理用地取得<br>B：已取得用地，接續辦理之工程<br>C：辦理取得用地中，且接續辦理之工程<br>D：其他(請說明)</th>
-                    <th>預估用地取得經費(千元)<br>(僅類別屬用地先期需填列)</th>
-                    <th>用地案是否已送評定市價<br>(是/否)</th>
-                    <th>116年<br>(A)</th>
-                    <th>117年<br>(B)</th>
-                    <th>118年以後(含)<br>(C)</th>
-                </tr>
-            `;
-
-        } else {
-
-            businessDataHead.innerHTML = `
-                <tr>
-                    <th rowspan="2">項次</th>
-                    <th rowspan="2">類別<br>(工程、用地先期、用地取得、委託測設監造、橋梁改建)</th>
+                    <th rowspan="2">${commonCategoryHeader}</th>
                     <th rowspan="2">分署別</th>
                     <th rowspan="2">縣市</th>
                     <th rowspan="2">鄉鎮市</th>
@@ -5075,7 +6538,7 @@
                     <th colspan="3">年度預估使用經費(千元)</th>
                     <th rowspan="2">經費需求(千元)<br>(D=A+B+C)</th>
                     <th rowspan="2">預估碳排量(tCO2e)</th>
-                    <th rowspan="2">備註(請填列關切人員或長官交辦紀錄等)</th>
+                    <th rowspan="2">備註</th>
                 </tr>
                 <tr>
                     <th>建造物名稱</th>
@@ -5086,115 +6549,1247 @@
                     <th>保護人口數<br>(千人)</th>
                     <th>生態友善及地景營造長度<br>(公尺)</th>
                     <th>整體環境改善面積<br>(公頃)</th>
-                    <th>A：已完成用地先期作業，接續辦理用地取得<br>B：已取得用地，接續辦理之工程<br>C：辦理取得用地中，且接續辦理之工程<br>D：其他(請說明)</th>
-                    <th>預估用地取得經費(千元)<br>(僅類別屬用地先期需填列)</th>
-                    <th>用地案是否已送評定市價<br>(是/否)</th>
-                    <th>116年<br>(A)</th>
-                    <th>117年<br>(B)</th>
-                    <th>118年以後(含)<br>(C)</th>
+                    ${commonLandHeaders}
+                    ${commonBudgetHeaders}
+                </tr>
+            `;
+
+        } else if (
+            appendixType ===
+            "appendix2"
+        ) {
+
+            businessDataHead.innerHTML = `
+                <tr>
+                    <th rowspan="2">項次</th>
+                    <th rowspan="2">${commonCategoryHeader}</th>
+                    <th rowspan="2">分署別</th>
+                    <th rowspan="2">縣市</th>
+                    <th rowspan="2">鄉鎮市</th>
+                    <th rowspan="2">排水名稱</th>
+                    <th rowspan="2">案件名稱</th>
+                    <th colspan="4">提報工程內容</th>
+                    <th colspan="4">預期工程效益</th>
+                    <th rowspan="2">是否辦理核定階段生態檢核<br>(是/否)</th>
+                    <th rowspan="2">座標點位<br>(TWD97，經緯度)</th>
+                    <th colspan="3">用地辦理情形</th>
+                    <th rowspan="2">預定開工日期<br>(年/月/日)</th>
+                    <th rowspan="2">預定完工日期<br>(年/月/日)</th>
+                    <th rowspan="2">預定工期<br>(月)</th>
+                    <th colspan="3">年度預估使用經費(千元)</th>
+                    <th rowspan="2">經費需求(千元)<br>(D=A+B+C)</th>
+                    <th rowspan="2">預估碳排量(tCO2e)</th>
+                    <th rowspan="2">備註</th>
+                </tr>
+                <tr>
+                    <th>建造物名稱</th>
+                    <th>堤防<br>(公尺)</th>
+                    <th>護岸<br>(公尺)</th>
+                    <th>其他<br>(請說明)</th>
+                    <th>保護面積<br>(公頃)</th>
+                    <th>保護人口數<br>(千人)</th>
+                    <th>生態友善及地景營造長度<br>(公尺)</th>
+                    <th>整體環境改善面積<br>(公頃)</th>
+                    ${commonLandHeaders}
+                    ${commonBudgetHeaders}
+                </tr>
+            `;
+
+        } else if (
+            appendixType ===
+            "appendix3"
+        ) {
+
+            businessDataHead.innerHTML = `
+                <tr>
+                    <th rowspan="2">項次</th>
+                    <th rowspan="2">${commonCategoryHeader}</th>
+                    <th rowspan="2">分署別</th>
+                    <th rowspan="2">縣市</th>
+                    <th rowspan="2">鄉鎮市</th>
+                    <th rowspan="2">海岸名稱</th>
+                    <th rowspan="2">案件名稱</th>
+                    <th colspan="4">提報工程內容</th>
+                    <th colspan="4">預期工程效益</th>
+                    <th rowspan="2">是否辦理核定階段生態檢核<br>(是/否)</th>
+                    <th rowspan="2">座標點位<br>(TWD97，經緯度)</th>
+                    <th colspan="3">用地辦理情形</th>
+                    <th rowspan="2">預定開工日期<br>(年/月/日)</th>
+                    <th rowspan="2">預定完工日期<br>(年/月/日)</th>
+                    <th rowspan="2">預定工期<br>(月)</th>
+                    <th colspan="3">年度預估使用經費(千元)</th>
+                    <th rowspan="2">經費需求(千元)<br>(D=A+B+C)</th>
+                    <th rowspan="2">預估碳排量(tCO2e)</th>
+                    <th rowspan="2">備註</th>
+                </tr>
+                <tr>
+                    <th>建造物名稱</th>
+                    <th>改善面積<br>(公頃)</th>
+                    <th>改善長度<br>(公尺)</th>
+                    <th>其他</th>
+                    <th>保護面積<br>(公頃)</th>
+                    <th>保護人口數<br>(千人)</th>
+                    <th>生態友善及地景營造長度<br>(公尺)</th>
+                    <th>整體環境改善面積<br>(公頃)</th>
+                    ${commonLandHeaders}
+                    ${commonBudgetHeaders}
+                </tr>
+            `;
+
+        } else if (
+            appendixType ===
+            "appendix4"
+        ) {
+
+            businessDataHead.innerHTML = `
+                <tr>
+                    <th rowspan="2">項次</th>
+                    <th rowspan="2">${commonCategoryHeader}</th>
+                    <th rowspan="2">分署別</th>
+                    <th rowspan="2">縣市</th>
+                    <th rowspan="2">鄉鎮市</th>
+                    <th rowspan="2">流域別<br>河川／區排／海岸</th>
+                    <th rowspan="2">溪別、區排或海岸名稱</th>
+                    <th rowspan="2">案件名稱</th>
+                    <th colspan="4">提報工程內容</th>
+                    <th colspan="4">預期工程效益</th>
+                    <th rowspan="2">是否辦理核定階段生態檢核<br>(是/否)</th>
+                    <th rowspan="2">座標點位<br>(TWD97，經緯度)</th>
+                    <th colspan="3">用地辦理情形</th>
+                    <th rowspan="2">預定開工日期<br>(年/月/日)</th>
+                    <th rowspan="2">預定完工日期<br>(年/月/日)</th>
+                    <th rowspan="2">預定工期<br>(月)</th>
+                    <th colspan="3">年度預估使用經費(千元)</th>
+                    <th rowspan="2">經費需求(千元)<br>(D=A+B+C)</th>
+                    <th rowspan="2">預估碳排量(tCO2e)</th>
+                    <th rowspan="2">備註</th>
+                </tr>
+                <tr>
+                    <th>建造物名稱</th>
+                    <th>整體環境改善長度<br>(公尺)</th>
+                    <th>整體環境改善面積<br>(公頃)</th>
+                    <th>其他</th>
+                    <th>保護面積<br>(公頃)</th>
+                    <th>保護人口數<br>(千人)</th>
+                    <th>生態友善及地景營造長度<br>(公尺)</th>
+                    <th>生態友善及地景營造面積<br>(公頃)</th>
+                    ${commonLandHeaders}
+                    ${commonBudgetHeaders}
+                </tr>
+            `;
+
+        } else if (
+            appendixType ===
+            "appendix5"
+        ) {
+
+            businessDataHead.innerHTML = `
+                <tr>
+                    <th rowspan="2">項次</th>
+                    <th rowspan="2">${commonCategoryHeader}</th>
+                    <th rowspan="2">分署別</th>
+                    <th rowspan="2">縣市</th>
+                    <th rowspan="2">鄉鎮市</th>
+                    <th rowspan="2">流域別<br>河川／區排／海岸</th>
+                    <th rowspan="2">溪別、區排或海岸名稱</th>
+                    <th rowspan="2">案件名稱</th>
+                    <th colspan="4">提報工程內容</th>
+                    <th colspan="4">預期工程效益</th>
+                    <th rowspan="2">是否辦理核定階段生態檢核<br>(是/否)</th>
+                    <th rowspan="2">座標點位<br>(TWD97，經緯度)</th>
+                    <th colspan="3">用地辦理情形</th>
+                    <th rowspan="2">預定開工日期<br>(年/月/日)</th>
+                    <th rowspan="2">預定完工日期<br>(年/月/日)</th>
+                    <th rowspan="2">預定工期<br>(月)</th>
+                    <th colspan="3">年度預估使用經費(千元)</th>
+                    <th rowspan="2">經費需求(千元)<br>(D=A+B+C)</th>
+                    <th rowspan="2">預估碳排量(tCO2e)</th>
+                    <th rowspan="2">備註</th>
+                </tr>
+                <tr>
+                    <th>建造物名稱</th>
+                    <th>堤防<br>(公尺)</th>
+                    <th>護岸<br>(公尺)</th>
+                    <th>其他</th>
+                    <th>保護面積<br>(公頃)</th>
+                    <th>保護人口數<br>(千人)</th>
+                    <th>生態友善及地景營造長度<br>(公尺)</th>
+                    <th>整體環境改善面積<br>(公頃)</th>
+                    ${commonLandHeaders}
+                    ${commonBudgetHeaders}
+                </tr>
+            `;
+
+        } else {
+
+            // 附表6
+            businessDataHead.innerHTML = `
+                <tr>
+                    <th rowspan="2">項次</th>
+                    <th rowspan="2">${commonCategoryHeader}</th>
+                    <th rowspan="2">分署別</th>
+                    <th rowspan="2">縣市</th>
+                    <th rowspan="2">鄉鎮市</th>
+                    <th rowspan="2">流域別<br>河川／區排／海岸</th>
+                    <th rowspan="2">溪別、區排或海岸名稱</th>
+                    <th rowspan="2">案件名稱</th>
+                    <th colspan="6">提報工程內容</th>
+                    <th colspan="4">預期工程效益</th>
+                    <th rowspan="2">是否辦理核定階段生態檢核<br>(是/否)</th>
+                    <th rowspan="2">座標點位<br>(TWD97，經緯度)</th>
+                    <th colspan="3">用地辦理情形</th>
+                    <th rowspan="2">預定開工日期<br>(年/月/日)</th>
+                    <th rowspan="2">預定完工日期<br>(年/月/日)</th>
+                    <th rowspan="2">預定工期<br>(月)</th>
+                    <th colspan="3">年度預估使用經費(千元)</th>
+                    <th rowspan="2">經費需求(千元)<br>(D=A+B+C)</th>
+                    <th rowspan="2">預估碳排量(tCO2e)</th>
+                    <th rowspan="2">備註</th>
+                </tr>
+                <tr>
+                    <th>建造物名稱</th>
+                    <th>堤防(海堤)<br>(公尺)</th>
+                    <th>護岸<br>(公尺)</th>
+                    <th>水門更新改善<br>(座)</th>
+                    <th>水防道路維護<br>(平方公尺)</th>
+                    <th>其他</th>
+                    <th>保護面積<br>(公頃)</th>
+                    <th>保護人口數<br>(千人)</th>
+                    <th>生態友善及地景營造長度<br>(公尺)</th>
+                    <th>整體環境改善面積<br>(公頃)</th>
+                    ${commonLandHeaders}
+                    ${commonBudgetHeaders}
                 </tr>
             `;
         }
     }
 
 
-    function createBusinessCaseNameCell(rowData, appendixType) {
+function createBusinessCaseNameCell(
+    rowData,
+    appendixType
+) {
 
-        const td = document.createElement("td");
-        const isAppendix2 = appendixType === "appendix2";
-        const caseNameIndex = isAppendix2 ? 6 : 7;
-        const caseIdIndex = isAppendix2 ? 34 : 36;
+    const td =
+        document.createElement(
+            "td"
+        );
 
-        const wrap = document.createElement("div");
-        wrap.className = "case-name-line-wrap";
+    const config =
+        getAppendixClientConfig(
+            appendixType
+        );
 
-        const nameSpan = document.createElement("span");
-        nameSpan.className = "case-name-text";
-        nameSpan.textContent = rowData[caseNameIndex] || "";
-        wrap.appendChild(nameSpan);
+    const caseNameIndex =
+        config.caseNameIndex;
 
-        const caseId = String(rowData[caseIdIndex] || "").trim();
+    const caseIdIndex =
+        config.caseIdIndex;
 
-        if (caseId !== "") {
+    const wrap =
+        document.createElement(
+            "div"
+        );
 
-            const lineButton = document.createElement("button");
-            lineButton.type = "button";
-            lineButton.className = "view-line-button";
-            lineButton.textContent = "🔎 查看線形";
+    wrap.className =
+        "case-name-line-wrap";
 
-            lineButton.addEventListener(
-                "click",
-                function() {
-                    openViewLineMap({
-                        appendixType: appendixType,
-                        caseId: caseId,
-                        division: rowData[2] || "",
-                        county: rowData[3] || "",
-                        township: rowData[4] || "",
-                        riverSystem: isAppendix2 ? "" : (rowData[5] || ""),
-                        creek: isAppendix2 ? "" : (rowData[6] || ""),
-                        drainageName: isAppendix2 ? (rowData[5] || "") : "",
-                        caseName: rowData[caseNameIndex] || ""
-                    });
-                }
+    const nameSpan =
+        document.createElement(
+            "span"
+        );
+
+    nameSpan.className =
+        "case-name-text";
+
+    nameSpan.textContent =
+        rowData[
+            caseNameIndex
+        ] || "";
+
+    wrap.appendChild(
+        nameSpan
+    );
+
+    const caseId =
+        String(
+            rowData[
+                caseIdIndex
+            ] || ""
+        ).trim();
+
+    if (caseId !== "") {
+
+        const lineButton =
+            document.createElement(
+                "button"
             );
 
-            wrap.appendChild(lineButton);
-        }
+        lineButton.type =
+            "button";
 
-        td.appendChild(wrap);
-        return td;
+        lineButton.className =
+            "view-line-button";
+
+        lineButton.textContent =
+            "🔎 查看線形";
+
+        lineButton.addEventListener(
+            "click",
+            function() {
+
+                const lineCaseData = {
+                    appendixType:
+                        appendixType,
+                    caseId:
+                        caseId,
+                    division:
+                        rowData[2] || "",
+                    county:
+                        rowData[3] || "",
+                    township:
+                        rowData[4] || "",
+                    riverSystem: "",
+                    creek: "",
+                    drainageName: "",
+                    coastName: "",
+                    flowCategory: "",
+                    waterbodyName: "",
+                    caseName:
+                        rowData[
+                            caseNameIndex
+                        ] || ""
+                };
+
+                if (
+                    appendixType ===
+                    "appendix1"
+                ) {
+
+                    lineCaseData.riverSystem =
+                        rowData[5] || "";
+
+                    lineCaseData.creek =
+                        rowData[6] || "";
+
+                } else if (
+                    appendixType ===
+                    "appendix2"
+                ) {
+
+                    lineCaseData.drainageName =
+                        rowData[5] || "";
+
+                } else if (
+                    appendixType ===
+                    "appendix3"
+                ) {
+
+                    lineCaseData.coastName =
+                        rowData[5] || "";
+
+                } else {
+
+                    lineCaseData.flowCategory =
+                        rowData[5] || "";
+
+                    lineCaseData.waterbodyName =
+                        rowData[6] || "";
+                }
+
+                openViewLineMap(
+                    lineCaseData
+                );
+            }
+        );
+
+        wrap.appendChild(
+            lineButton
+        );
     }
 
+    td.appendChild(
+        wrap
+    );
 
-    function renderBusinessDataRows(rows, appendixType) {
+    return td;
+}
 
-        businessDataBody.innerHTML = "";
+function renderBusinessDataRowsInto(
+    targetBody,
+    rows,
+    appendixType
+) {
 
-        const isAppendix2 = appendixType === "appendix2";
-        const lastFormalIndex = isAppendix2 ? 33 : 35;
-        const hiddenStart = isAppendix2 ? 28 : 30;
-        const hiddenEnd = isAppendix2 ? 32 : 34;
-        const caseNameIndex = isAppendix2 ? 6 : 7;
+    targetBody.innerHTML =
+        "";
 
-        rows.forEach(function(rowData, rowIndex) {
+    const config =
+        getAppendixClientConfig(
+            appendixType
+        );
 
-            const tr = document.createElement("tr");
+    const lastFormalIndex =
+        config.formalLastIndex;
 
-            for (let i = 0; i <= lastFormalIndex; i++) {
+    const hiddenStart =
+        config.hiddenStart;
 
-                if (i >= hiddenStart && i <= hiddenEnd) {
+    const hiddenEnd =
+        config.hiddenEnd;
+
+    const caseNameIndex =
+        config.caseNameIndex;
+
+    rows.forEach(
+        function(
+            rowData,
+            rowIndex
+        ) {
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+            const caseId =
+                rowData &&
+                rowData[config.caseIdIndex] !== undefined &&
+                rowData[config.caseIdIndex] !== null
+                    ? String(rowData[config.caseIdIndex])
+                    : "";
+
+            if (caseId) {
+                tr.dataset.caseId = caseId;
+            }
+
+            for (
+                let i = 0;
+                i <=
+                lastFormalIndex;
+                i++
+            ) {
+
+                // 河海組初擬意見／結論不在網頁提報內容顯示。
+                if (
+                    i >= hiddenStart &&
+                    i <= hiddenEnd
+                ) {
                     continue;
                 }
 
-                if (i === caseNameIndex) {
+                if (
+                    i ===
+                    caseNameIndex
+                ) {
+
                     tr.appendChild(
                         createBusinessCaseNameCell(
                             rowData,
                             appendixType
                         )
                     );
+
                     continue;
                 }
 
-                const td = document.createElement("td");
+                const td =
+                    document.createElement(
+                        "td"
+                    );
 
                 if (i === 0) {
-                    td.textContent = rowIndex + 1;
+
+                    td.className =
+                        "business-order-cell";
+
+                    const handle =
+                        document.createElement(
+                            "span"
+                        );
+
+                    handle.className =
+                        "case-sort-handle";
+                    handle.textContent = "☰";
+                    handle.title =
+                        "拖曳調整案件優先順序";
+
+                    const number =
+                        document.createElement(
+                            "span"
+                        );
+
+                    number.className =
+                        "case-order-number";
+                    number.textContent =
+                        rowIndex + 1;
+
+                    td.appendChild(handle);
+                    td.appendChild(number);
+
                 } else {
+
                     td.textContent =
                         rowData &&
-                        rowData[i] !== undefined &&
-                        rowData[i] !== null
+                        rowData[i] !==
+                            undefined &&
+                        rowData[i] !==
+                            null
                             ? rowData[i]
                             : "";
                 }
 
-                tr.appendChild(td);
+                tr.appendChild(
+                    td
+                );
             }
 
-            businessDataBody.appendChild(tr);
+            targetBody
+                .appendChild(
+                    tr
+                );
+        }
+    );
+}
+
+
+function renderBusinessDataRows(
+    rows,
+    appendixType
+) {
+    renderBusinessDataRowsInto(
+        businessDataBody,
+        rows,
+        appendixType
+    );
+}
+
+    function readAppendixDataForAllView(
+        appendixType,
+        selectedDivision
+    ) {
+
+        return new Promise(function(resolve, reject) {
+
+            allAppendixRequestSerial++;
+
+            const callbackName =
+                "allAppendixDataCallback_" +
+                Date.now() +
+                "_" +
+                allAppendixRequestSerial;
+
+            const script =
+                document.createElement("script");
+
+            let settled = false;
+
+            function cleanup() {
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+
+                try {
+                    delete window[callbackName];
+                } catch (error) {
+                    window[callbackName] = undefined;
+                }
+            }
+
+            const timeoutId =
+                setTimeout(function() {
+                    if (settled) {
+                        return;
+                    }
+
+                    settled = true;
+                    cleanup();
+                    reject(
+                        new Error(
+                            appendixType +
+                            " 資料讀取逾時"
+                        )
+                    );
+                }, 15000);
+
+            window[callbackName] =
+                function(response) {
+
+                    if (settled) {
+                        return;
+                    }
+
+                    settled = true;
+                    clearTimeout(timeoutId);
+                    cleanup();
+
+                    if (
+                        handleAuthFailure(
+                            response
+                        )
+                    ) {
+                        reject(
+                            new Error(
+                                "登入已失效"
+                            )
+                        );
+                        return;
+                    }
+
+                    if (
+                        !response ||
+                        response.success !== true
+                    ) {
+                        reject(
+                            new Error(
+                                response &&
+                                response.message
+                                    ? response.message
+                                    : appendixType +
+                                      " 資料讀取失敗"
+                            )
+                        );
+                        return;
+                    }
+
+                    resolve({
+                        appendixType:
+                            appendixType,
+                        rows:
+                            Array.isArray(
+                                response.data
+                            )
+                                ? response.data
+                                : []
+                    });
+                };
+
+            script.src =
+                GAS_URL +
+                "?action=read" +
+                "&appendixType=" +
+                encodeURIComponent(
+                    appendixType
+                ) +
+                "&division=" +
+                encodeURIComponent(
+                    selectedDivision
+                ) +
+                "&token=" +
+                encodeURIComponent(
+                    getAuthToken()
+                ) +
+                "&callback=" +
+                encodeURIComponent(
+                    callbackName
+                ) +
+                "&_=" +
+                Date.now();
+
+            script.onerror =
+                function() {
+                    if (settled) {
+                        return;
+                    }
+
+                    settled = true;
+                    clearTimeout(timeoutId);
+                    cleanup();
+
+                    reject(
+                        new Error(
+                            appendixType +
+                            " 資料讀取失敗"
+                        )
+                    );
+                };
+
+            document.body.appendChild(
+                script
+            );
         });
+    }
+
+
+    function getBusinessDataHeadHtmlForAppendix(
+        appendixType
+    ) {
+
+        const originalValue =
+            businessAppendixTypeSelect.value;
+
+        businessAppendixTypeSelect.value =
+            appendixType;
+
+        renderBusinessDataHead();
+
+        const html =
+            businessDataHead.innerHTML;
+
+        businessAppendixTypeSelect.value =
+            originalValue;
+
+        if (originalValue === "all") {
+            businessDataHead.innerHTML = "";
+        } else {
+            renderBusinessDataHead();
+        }
+
+        return html;
+    }
+
+
+    function renderAllAppendicesAggregateDashboard(
+        allData
+    ) {
+
+        const container =
+            document.getElementById(
+                "contentDashboard"
+            );
+
+        if (!container) {
+            return;
+        }
+
+        let completeCount = 0;
+        let incompleteCount = 0;
+        let totalFunding = 0;
+        let budgetA = 0;
+
+        const appendixDistribution = {};
+
+        const categoryDistribution = {
+            "工程": 0,
+            "用地先期": 0,
+            "用地取得": 0,
+            "委託測設監造": 0,
+            "橋梁改建": 0
+        };
+
+        const countyDistribution = {};
+
+        Object.keys(allData)
+            .forEach(function(appendixType) {
+
+                const rows =
+                    allData[appendixType] || [];
+
+                const config =
+                    getAppendixClientConfig(
+                        appendixType
+                    );
+
+                const validRows =
+                    getValidRowsForAppendix(
+                        rows,
+                        appendixType
+                    );
+
+                const appendixLabel =
+                    appendixType.replace(
+                        "appendix",
+                        "附表"
+                    );
+
+                appendixDistribution[
+                    appendixLabel
+                ] = validRows.length;
+
+                completeCount +=
+                    validRows.length;
+
+                incompleteCount +=
+                    rows.length -
+                    validRows.length;
+
+                validRows.forEach(function(row) {
+
+                    totalFunding +=
+                        parseSheetNumber(
+                            row[
+                                config
+                                    .totalFundingIndex
+                            ]
+                        );
+
+                    budgetA +=
+                        parseSheetNumber(
+                            row[
+                                config
+                                    .budgetAIndex
+                            ]
+                        );
+
+                    const category =
+                        String(
+                            row[1] || ""
+                        ).trim();
+
+                    if (
+                        Object.prototype
+                            .hasOwnProperty
+                            .call(
+                                categoryDistribution,
+                                category
+                            )
+                    ) {
+                        categoryDistribution[
+                            category
+                        ]++;
+                    }
+
+                    const county =
+                        String(
+                            row[3] ||
+                            "未填列"
+                        ).trim();
+
+                    countyDistribution[county] =
+                        (countyDistribution[county] || 0) + 1;
+                });
+            });
+
+        container.innerHTML = `
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-label">全部附表完整提報案件</div>
+                    <div class="dashboard-card-value">
+                        ${completeCount}
+                        <span class="dashboard-card-unit">件</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="dashboard-card-label">經費需求合計</div>
+                    <div class="dashboard-card-value">
+                        ${formatDashboardNumber(totalFunding)}
+                        <span class="dashboard-card-unit">千元</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="dashboard-card-label">115年度預估使用經費</div>
+                    <div class="dashboard-card-value">
+                        ${formatDashboardNumber(budgetA)}
+                        <span class="dashboard-card-unit">千元</span>
+                    </div>
+                </div>
+            </div>
+
+            ${
+                incompleteCount > 0
+                    ? '<div class="all-appendices-note">另有 ' +
+                      incompleteCount +
+                      ' 筆資料尚未完整填列，不列入上述完整案件統計。</div>'
+                    : ""
+            }
+
+            <div class="dashboard-breakdowns">
+                ${createDashboardBars(
+                    appendixDistribution,
+                    "附表分布"
+                )}
+                ${createDashboardBars(
+                    categoryDistribution,
+                    "案件類別分布"
+                )}
+                ${createDashboardBars(
+                    countyDistribution,
+                    "縣市分布"
+                )}
+            </div>
+        `;
+    }
+
+
+    function renderAllAppendicesSections(
+        allData,
+        appendixTypes
+    ) {
+
+        if (!allAppendicesView) {
+            return;
+        }
+
+        allAppendicesView.innerHTML = "";
+
+        if (
+            hasNoRegionalDrainage(
+                divisionSelect.value
+            )
+        ) {
+            const note =
+                document.createElement("div");
+
+            note.className =
+                "all-appendices-note";
+
+            note.textContent =
+                "本分署無轄管中央管區域排水，因此「全部附表」總覽不列入附表2。";
+
+            allAppendicesView.appendChild(
+                note
+            );
+        }
+
+        appendixTypes.forEach(function(appendixType) {
+
+            const rows =
+                allData[appendixType] || [];
+
+            const config =
+                getAppendixClientConfig(
+                    appendixType
+                );
+
+            const validRows =
+                getValidRowsForAppendix(
+                    rows,
+                    appendixType
+                );
+
+            const section =
+                document.createElement(
+                    "section"
+                );
+
+            section.className =
+                "all-appendix-section";
+
+            const header =
+                document.createElement(
+                    "div"
+                );
+
+            header.className =
+                "all-appendix-section-header";
+
+            const left =
+                document.createElement(
+                    "div"
+                );
+
+            const title =
+                document.createElement(
+                    "h3"
+                );
+
+            title.className =
+                "all-appendix-section-title";
+
+            title.textContent =
+                config.businessTitle;
+
+            const meta =
+                document.createElement(
+                    "div"
+                );
+
+            meta.className =
+                "all-appendix-section-meta";
+
+            meta.textContent =
+                "完整提報 " +
+                validRows.length +
+                " 件／全部資料 " +
+                rows.length +
+                " 筆";
+
+            left.appendChild(title);
+            left.appendChild(meta);
+
+            const jumpButton =
+                document.createElement(
+                    "button"
+                );
+
+            jumpButton.type = "button";
+            jumpButton.className =
+                "secondary-button all-appendix-jump-button";
+            jumpButton.textContent =
+                "單獨查看此附表";
+
+            jumpButton.addEventListener(
+                "click",
+                function() {
+                    businessAppendixTypeSelect.value =
+                        appendixType;
+
+                    businessAppendixTypeSelect.dispatchEvent(
+                        new Event("change")
+                    );
+                }
+            );
+
+            header.appendChild(left);
+            header.appendChild(jumpButton);
+            section.appendChild(header);
+
+            const dashboardWrap =
+                document.createElement(
+                    "div"
+                );
+
+            dashboardWrap.className =
+                "all-appendix-dashboard-wrap";
+
+            const dashboard =
+                document.createElement(
+                    "div"
+                );
+
+            const dashboardId =
+                "allDashboard_" +
+                appendixType;
+
+            dashboard.id = dashboardId;
+            dashboard.className =
+                "appendix-dashboard";
+
+            dashboardWrap.appendChild(
+                dashboard
+            );
+
+            section.appendChild(
+                dashboardWrap
+            );
+
+            renderGenericAppendixDashboard(
+                rows,
+                dashboardId,
+                appendixType
+            );
+
+            if (rows.length === 0) {
+                const empty =
+                    document.createElement(
+                        "div"
+                    );
+
+                empty.className =
+                    "all-appendix-empty";
+
+                empty.textContent =
+                    "目前尚無此附表資料。";
+
+                section.appendChild(
+                    empty
+                );
+
+                allAppendicesView.appendChild(
+                    section
+                );
+
+                return;
+            }
+
+            const tableWrap =
+                document.createElement(
+                    "div"
+                );
+
+            tableWrap.className =
+                "all-appendix-table-wrap table-wrap";
+
+            const table =
+                document.createElement(
+                    "table"
+                );
+
+            table.className =
+                "business-table";
+
+            const thead =
+                document.createElement(
+                    "thead"
+                );
+
+            thead.innerHTML =
+                getBusinessDataHeadHtmlForAppendix(
+                    appendixType
+                );
+
+            const tbody =
+                document.createElement(
+                    "tbody"
+                );
+
+            renderBusinessDataRowsInto(
+                tbody,
+                rows,
+                appendixType
+            );
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            tableWrap.appendChild(table);
+            section.appendChild(tableWrap);
+
+            allAppendicesView.appendChild(
+                section
+            );
+        });
+    }
+
+
+    async function loadAllAppendicesData() {
+
+        const divisionId =
+            divisionSelect.value;
+
+        if (
+            !divisionId ||
+            !divisions[divisionId]
+        ) {
+            dataStatus.textContent =
+                "請先從頁面上方選擇河川分署";
+            return;
+        }
+
+        if (businessCaseOrderMode) {
+            leaveBusinessCaseOrderMode();
+        }
+
+        currentBusinessRows = [];
+        currentBusinessAppendixType = "all";
+        setBusinessCaseOrderControls();
+
+        setBusinessContentMode(true);
+        businessDataBody.innerHTML = "";
+        businessDataHead.innerHTML = "";
+
+        const contentDashboard =
+            document.getElementById(
+                "contentDashboard"
+            );
+
+        if (contentDashboard) {
+            contentDashboard.innerHTML = "";
+        }
+
+        if (allAppendicesView) {
+            allAppendicesView.innerHTML = "";
+        }
+
+        const selectedDivision =
+            divisions[divisionId].name;
+
+        const appendixTypes =
+            getBusinessAppendixTypesForCurrentDivision();
+
+        dataStatus.textContent =
+            selectedDivision +
+            "全部附表資料載入中...";
+
+        clearTimeout(dataLoadTimer);
+        dataLoadTimer =
+            setTimeout(function() {
+                dataStatus.textContent =
+                    "全部附表資料讀取逾時，請確認網路問題。";
+            }, 25000);
+
+        try {
+
+            const results =
+                await Promise.all(
+                    appendixTypes.map(function(appendixType) {
+                        return readAppendixDataForAllView(
+                            appendixType,
+                            selectedDivision
+                        );
+                    })
+                );
+
+            clearTimeout(dataLoadTimer);
+
+            if (!isAllBusinessAppendicesMode()) {
+                return;
+            }
+
+            const allData = {};
+
+            results.forEach(function(result) {
+                allData[result.appendixType] =
+                    result.rows;
+            });
+
+            renderAllAppendicesAggregateDashboard(
+                allData
+            );
+
+            renderAllAppendicesSections(
+                allData,
+                appendixTypes
+            );
+
+            let completeCount = 0;
+            let incompleteCount = 0;
+
+            appendixTypes.forEach(function(appendixType) {
+                const rows =
+                    allData[appendixType] || [];
+                const validRows =
+                    getValidRowsForAppendix(
+                        rows,
+                        appendixType
+                    );
+                completeCount +=
+                    validRows.length;
+                incompleteCount +=
+                    rows.length -
+                    validRows.length;
+            });
+
+            dataStatus.textContent =
+                selectedDivision +
+                "全部附表共有 " +
+                completeCount +
+                " 筆完整提報案件" +
+                (
+                    incompleteCount > 0
+                        ? "（另有 " +
+                          incompleteCount +
+                          " 筆未完整填列資料）"
+                        : ""
+                );
+
+            if (
+                document
+                    .getElementById(
+                        "businessDataPage"
+                    )
+                    .classList
+                    .contains("active")
+            ) {
+                loadOverviewLineMapAllAppendices(
+                    appendixTypes
+                );
+            }
+
+        } catch (error) {
+
+            clearTimeout(dataLoadTimer);
+
+            if (!isAllBusinessAppendicesMode()) {
+                return;
+            }
+
+            dataStatus.textContent =
+                "全部附表資料讀取失敗：" +
+                (error && error.message
+                    ? error.message
+                    : "未知錯誤");
+
+            if (contentDashboard) {
+                contentDashboard.innerHTML = "";
+            }
+
+            if (allAppendicesView) {
+                allAppendicesView.innerHTML =
+                    '<div class="all-appendices-note">無法載入全部附表資料，請重新載入或改為單獨查看附表。</div>';
+            }
+        }
     }
 
 
@@ -5203,8 +7798,16 @@
         const appendixType =
             getCurrentBusinessAppendixType();
 
-        renderBusinessDataHead();
         updateBusinessDataTitle();
+
+        if (appendixType === "all") {
+            renderBusinessDataHead();
+            loadAllAppendicesData();
+            return;
+        }
+
+        setBusinessContentMode(false);
+        renderBusinessDataHead();
 
         const divisionId = divisionSelect.value;
 
@@ -5296,105 +7899,649 @@
     }
 
 
-    function handleBusinessData(response) {
 
-        if (handleAuthFailure(response)) {
+function updateBusinessCaseOrderNumbers() {
+
+    if (!businessDataBody) {
+        return;
+    }
+
+    Array.from(
+        businessDataBody.querySelectorAll(
+            "tr[data-case-id]"
+        )
+    ).forEach(function(row, index) {
+
+        const number =
+            row.querySelector(
+                ".case-order-number"
+            );
+
+        if (number) {
+            number.textContent =
+                String(index + 1);
+        }
+    });
+}
+
+
+function setBusinessCaseOrderControls() {
+
+    const allMode =
+        isAllBusinessAppendicesMode();
+
+    const hasRows =
+        currentBusinessRows.length > 1;
+
+    if (startCaseOrderButton) {
+        startCaseOrderButton.style.display =
+            !allMode &&
+            !businessCaseOrderMode &&
+            hasRows
+                ? "inline-block"
+                : "none";
+    }
+
+    if (saveCaseOrderButton) {
+        saveCaseOrderButton.style.display =
+            businessCaseOrderMode
+                ? "inline-block"
+                : "none";
+    }
+
+    if (cancelCaseOrderButton) {
+        cancelCaseOrderButton.style.display =
+            businessCaseOrderMode
+                ? "inline-block"
+                : "none";
+    }
+
+    if (singleAppendixTableWrap) {
+        singleAppendixTableWrap.classList.toggle(
+            "case-sort-mode",
+            businessCaseOrderMode
+        );
+    }
+
+    if (businessAppendixTypeSelect) {
+        businessAppendixTypeSelect.disabled =
+            businessCaseOrderMode;
+    }
+
+    if (divisionSelect) {
+        divisionSelect.disabled =
+            businessCaseOrderMode ||
+            (
+                currentAuthRole ===
+                    "division"
+            );
+    }
+
+    if (refreshDataButton) {
+        refreshDataButton.disabled =
+            businessCaseOrderMode;
+    }
+
+    if (meetingExcelExportButton) {
+        meetingExcelExportButton.disabled =
+            businessCaseOrderMode;
+    }
+}
+
+
+function setBusinessRowsDraggable(enabled) {
+
+    Array.from(
+        businessDataBody.querySelectorAll(
+            "tr[data-case-id]"
+        )
+    ).forEach(function(row) {
+        row.draggable = !!enabled;
+    });
+}
+
+
+function enterBusinessCaseOrderMode() {
+
+    if (
+        isAllBusinessAppendicesMode() ||
+        currentBusinessRows.length < 2
+    ) {
+        return;
+    }
+
+    businessCaseOrderMode = true;
+    setBusinessRowsDraggable(true);
+    setBusinessCaseOrderControls();
+
+    if (caseOrderStatus) {
+        caseOrderStatus.textContent =
+            "請拖曳左側 ☰ 調整優先順序，完成後按「儲存排序」。";
+    }
+}
+
+
+function leaveBusinessCaseOrderMode() {
+
+    businessCaseOrderMode = false;
+    draggedBusinessRow = null;
+    setBusinessRowsDraggable(false);
+    setBusinessCaseOrderControls();
+
+    Array.from(
+        businessDataBody.querySelectorAll("tr")
+    ).forEach(function(row) {
+        row.classList.remove(
+            "case-sort-dragging",
+            "case-sort-drop-target"
+        );
+    });
+}
+
+
+function cancelBusinessCaseOrder() {
+
+    renderBusinessDataRows(
+        currentBusinessRows,
+        currentBusinessAppendixType
+    );
+
+    leaveBusinessCaseOrderMode();
+
+    if (caseOrderStatus) {
+        caseOrderStatus.textContent =
+            "已取消排序調整。";
+    }
+}
+
+
+function saveBusinessCaseOrder() {
+
+    if (!businessCaseOrderMode) {
+        return;
+    }
+
+    const divisionId =
+        divisionSelect.value;
+
+    if (
+        !divisionId ||
+        !divisions[divisionId]
+    ) {
+        if (caseOrderStatus) {
+            caseOrderStatus.textContent =
+                "請先選擇河川分署。";
+        }
+        return;
+    }
+
+    const caseIds =
+        Array.from(
+            businessDataBody.querySelectorAll(
+                "tr[data-case-id]"
+            )
+        ).map(function(row) {
+            return row.dataset.caseId || "";
+        }).filter(function(caseId) {
+            return caseId !== "";
+        });
+
+    if (
+        caseIds.length !==
+        currentBusinessRows.length
+    ) {
+        if (caseOrderStatus) {
+            caseOrderStatus.textContent =
+                "排序資料不完整，請重新載入後再試。";
+        }
+        return;
+    }
+
+    const callbackName =
+        "caseOrderSaveCallback_" +
+        Date.now();
+
+    const script =
+        document.createElement("script");
+
+    let settled = false;
+
+    function cleanup() {
+        if (script.parentNode) {
+            script.parentNode.removeChild(script);
+        }
+
+        try {
+            delete window[callbackName];
+        } catch (error) {
+            window[callbackName] = undefined;
+        }
+    }
+
+    window[callbackName] =
+        function(response) {
+
+            if (settled) {
+                return;
+            }
+
+            settled = true;
+            clearTimeout(caseOrderSaveTimer);
+            cleanup();
+
+            if (saveCaseOrderButton) {
+                saveCaseOrderButton.disabled = false;
+            }
+
+            if (
+                handleAuthFailure(
+                    response
+                )
+            ) {
+                return;
+            }
+
+            if (
+                !response ||
+                response.success !== true
+            ) {
+                if (caseOrderStatus) {
+                    caseOrderStatus.textContent =
+                        "排序儲存失敗：" +
+                        (
+                            response &&
+                            response.message
+                                ? response.message
+                                : "未知錯誤"
+                        );
+                }
+                return;
+            }
+
+            if (caseOrderStatus) {
+                caseOrderStatus.textContent =
+                    "✓ 優先順序已儲存。";
+            }
+
+            leaveBusinessCaseOrderMode();
+            loadBusinessData();
+        };
+
+    script.onerror = function() {
+        if (settled) {
             return;
         }
 
-        clearTimeout(dataLoadTimer);
+        settled = true;
+        clearTimeout(caseOrderSaveTimer);
+        cleanup();
 
-        if (!response || response.success !== true) {
+        if (saveCaseOrderButton) {
+            saveCaseOrderButton.disabled = false;
+        }
 
-            const message =
-                response && response.message
-                    ? response.message
-                    : "未知錯誤";
+        if (caseOrderStatus) {
+            caseOrderStatus.textContent =
+                "排序儲存失敗，請確認網路連線。";
+        }
+    };
 
-            dataStatus.textContent =
-                "資料讀取失敗：" + message;
+    script.src =
+        GAS_URL +
+        "?action=saveCaseOrder" +
+        "&appendixType=" +
+        encodeURIComponent(
+            currentBusinessAppendixType
+        ) +
+        "&division=" +
+        encodeURIComponent(
+            divisions[divisionId].name
+        ) +
+        "&caseIds=" +
+        encodeURIComponent(
+            JSON.stringify(caseIds)
+        ) +
+        "&token=" +
+        encodeURIComponent(
+            getAuthToken()
+        ) +
+        "&callback=" +
+        encodeURIComponent(
+            callbackName
+        ) +
+        "&_=" +
+        Date.now();
 
-            businessDataBody.innerHTML =
-                '<tr><td colspan="31" class="empty-row">無法讀取資料</td></tr>';
+    if (caseOrderStatus) {
+        caseOrderStatus.textContent =
+            "正在儲存案件優先順序...";
+    }
 
+    if (saveCaseOrderButton) {
+        saveCaseOrderButton.disabled = true;
+    }
+
+    document.body.appendChild(script);
+
+    caseOrderSaveTimer =
+        setTimeout(function() {
+            if (settled) {
+                return;
+            }
+
+            settled = true;
+            cleanup();
+
+            if (saveCaseOrderButton) {
+                saveCaseOrderButton.disabled = false;
+            }
+
+            if (caseOrderStatus) {
+                caseOrderStatus.textContent =
+                    "排序儲存逾時，請重新載入後再試。";
+            }
+        }, 15000);
+}
+
+
+businessDataBody.addEventListener(
+    "dragstart",
+    function(event) {
+
+        if (!businessCaseOrderMode) {
+            event.preventDefault();
             return;
         }
 
-        const appendixType =
-            response.appendixType ||
-            getCurrentBusinessAppendixType();
-
-        const rows =
-            Array.isArray(response.data)
-                ? response.data
-                : [];
-
-        if (appendixType === "appendix2") {
-            renderAppendix2Dashboard(
-                rows,
-                "contentDashboard"
+        const row =
+            event.target.closest(
+                "tr[data-case-id]"
             );
-        } else {
-            renderAppendix1Dashboard(
-                rows,
-                "contentDashboard"
+
+        if (!row) {
+            event.preventDefault();
+            return;
+        }
+
+        draggedBusinessRow = row;
+        row.classList.add(
+            "case-sort-dragging"
+        );
+
+        if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed =
+                "move";
+            event.dataTransfer.setData(
+                "text/plain",
+                row.dataset.caseId || ""
             );
         }
+    }
+);
+
+
+businessDataBody.addEventListener(
+    "dragover",
+    function(event) {
 
         if (
-            document
-                .getElementById("businessDataPage")
-                .classList
-                .contains("active")
+            !businessCaseOrderMode ||
+            !draggedBusinessRow
         ) {
-            loadOverviewLineMap();
-        }
-
-        businessDataBody.innerHTML = "";
-
-        if (rows.length === 0) {
-            dataStatus.textContent = "目前共有 0 筆資料";
             return;
         }
 
-        renderBusinessDataRows(
+        event.preventDefault();
+
+        const target =
+            event.target.closest(
+                "tr[data-case-id]"
+            );
+
+        if (
+            !target ||
+            target === draggedBusinessRow
+        ) {
+            return;
+        }
+
+        Array.from(
+            businessDataBody.querySelectorAll(
+                ".case-sort-drop-target"
+            )
+        ).forEach(function(row) {
+            row.classList.remove(
+                "case-sort-drop-target"
+            );
+        });
+
+        target.classList.add(
+            "case-sort-drop-target"
+        );
+
+        const rect =
+            target.getBoundingClientRect();
+
+        const before =
+            event.clientY <
+            rect.top +
+            rect.height / 2;
+
+        if (before) {
+            businessDataBody.insertBefore(
+                draggedBusinessRow,
+                target
+            );
+        } else {
+            businessDataBody.insertBefore(
+                draggedBusinessRow,
+                target.nextSibling
+            );
+        }
+
+        updateBusinessCaseOrderNumbers();
+    }
+);
+
+
+businessDataBody.addEventListener(
+    "drop",
+    function(event) {
+        if (businessCaseOrderMode) {
+            event.preventDefault();
+        }
+    }
+);
+
+
+businessDataBody.addEventListener(
+    "dragend",
+    function() {
+
+        Array.from(
+            businessDataBody.querySelectorAll("tr")
+        ).forEach(function(row) {
+            row.classList.remove(
+                "case-sort-dragging",
+                "case-sort-drop-target"
+            );
+        });
+
+        draggedBusinessRow = null;
+        updateBusinessCaseOrderNumbers();
+    }
+);
+
+
+if (startCaseOrderButton) {
+    startCaseOrderButton.addEventListener(
+        "click",
+        enterBusinessCaseOrderMode
+    );
+}
+
+if (saveCaseOrderButton) {
+    saveCaseOrderButton.addEventListener(
+        "click",
+        saveBusinessCaseOrder
+    );
+}
+
+if (cancelCaseOrderButton) {
+    cancelCaseOrderButton.addEventListener(
+        "click",
+        cancelBusinessCaseOrder
+    );
+}
+
+
+function handleBusinessData(
+    response
+) {
+
+    if (
+        handleAuthFailure(
+            response
+        )
+    ) {
+        return;
+    }
+
+    clearTimeout(
+        dataLoadTimer
+    );
+
+    if (
+        !response ||
+        response.success !==
+            true
+    ) {
+
+        const message =
+            response &&
+            response.message
+                ? response.message
+                : "未知錯誤";
+
+        dataStatus.textContent =
+            "資料讀取失敗：" +
+            message;
+
+        businessDataBody.innerHTML =
+            '<tr><td colspan="40" class="empty-row">無法讀取資料</td></tr>';
+
+        return;
+    }
+
+    const appendixType =
+        response.appendixType ||
+        getCurrentBusinessAppendixType();
+
+    const rows =
+        Array.isArray(
+            response.data
+        )
+            ? response.data
+            : [];
+
+    currentBusinessRows =
+        rows.map(function(row) {
+            return Array.isArray(row)
+                ? row.slice()
+                : row;
+        });
+
+    currentBusinessAppendixType =
+        appendixType;
+
+    if (businessCaseOrderMode) {
+        leaveBusinessCaseOrderMode();
+    }
+
+    if (caseOrderStatus) {
+        caseOrderStatus.textContent = "";
+    }
+
+    renderGenericAppendixDashboard(
+        rows,
+        "contentDashboard",
+        appendixType
+    );
+
+    if (
+        document
+            .getElementById(
+                "businessDataPage"
+            )
+            .classList
+            .contains(
+                "active"
+            )
+    ) {
+        loadOverviewLineMap();
+    }
+
+    businessDataBody.innerHTML =
+        "";
+
+    if (
+        rows.length === 0
+    ) {
+
+        dataStatus.textContent =
+            "目前共有 0 筆資料";
+
+        setBusinessCaseOrderControls();
+        return;
+    }
+
+    renderBusinessDataRows(
+        rows,
+        appendixType
+    );
+
+    setBusinessCaseOrderControls();
+
+    const divisionName =
+        divisions[
+            divisionSelect.value
+        ]
+            ? divisions[
+                  divisionSelect.value
+              ].name
+            : "";
+
+    const validRowsForStatus =
+        getValidRowsForAppendix(
             rows,
             appendixType
         );
 
-        const divisionName =
-            divisions[divisionSelect.value]
-                ? divisions[divisionSelect.value].name
-                : "";
+    const incompleteCount =
+        rows.length -
+        validRowsForStatus.length;
 
-        const validRowsForStatus =
-            appendixType === "appendix2"
-                ? getValidAppendix2Rows(rows)
-                : getValidAppendix1Rows(rows);
-
-        const incompleteCount =
-            rows.length - validRowsForStatus.length;
-
-        dataStatus.textContent =
-            divisionName +
-            "目前共有 " +
-            validRowsForStatus.length +
-            " 筆完整提報案件" +
-            (
-                incompleteCount > 0
-                    ? "（另有 " +
-                      incompleteCount +
-                      " 筆未完整填列資料）"
-                    : ""
-            );
-    }
-
+    dataStatus.textContent =
+        divisionName +
+        "目前共有 " +
+        validRowsForStatus.length +
+        " 筆完整提報案件" +
+        (
+            incompleteCount > 0
+                ? "（另有 " +
+                  incompleteCount +
+                  " 筆未完整填列資料）"
+                : ""
+        );
+}
 
     businessAppendixTypeSelect.addEventListener(
         "change",
         function() {
-            renderBusinessDataHead();
-            updateBusinessDataTitle();
+            if (businessCaseOrderMode) {
+                cancelBusinessCaseOrder();
+                return;
+            }
             loadBusinessData();
         }
     );
@@ -5410,9 +8557,6 @@
     let overviewLineGroup = null;
 
 
-    /**
-     * 建立提報內容右側的提報工程位置總覽地圖。
-     */
     function initializeOverviewLineMap() {
 
         if (overviewLineMap) {
@@ -5446,7 +8590,197 @@
      * 讀取目前所選河川分署的全部工程線形。
      * 使用 Apps Script 的 action=readLines，一次取得，不逐案發送請求。
      */
+    function readOverviewLinesForAllView(
+        appendixType,
+        selectedDivision
+    ) {
+
+        return new Promise(function(resolve, reject) {
+
+            allAppendixRequestSerial++;
+
+            const callbackName =
+                "allOverviewLinesCallback_" +
+                Date.now() +
+                "_" +
+                allAppendixRequestSerial;
+
+            const script =
+                document.createElement("script");
+
+            let settled = false;
+
+            function cleanup() {
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+
+                try {
+                    delete window[callbackName];
+                } catch (error) {
+                    window[callbackName] = undefined;
+                }
+            }
+
+            const timeoutId =
+                setTimeout(function() {
+                    if (settled) {
+                        return;
+                    }
+
+                    settled = true;
+                    cleanup();
+                    resolve([]);
+                }, 15000);
+
+            window[callbackName] =
+                function(response) {
+
+                    if (settled) {
+                        return;
+                    }
+
+                    settled = true;
+                    clearTimeout(timeoutId);
+                    cleanup();
+
+                    if (
+                        handleAuthFailure(response)
+                    ) {
+                        reject(
+                            new Error(
+                                "登入已失效"
+                            )
+                        );
+                        return;
+                    }
+
+                    if (
+                        !response ||
+                        response.success !== true
+                    ) {
+                        resolve([]);
+                        return;
+                    }
+
+                    resolve(
+                        Array.isArray(response.data)
+                            ? response.data
+                            : []
+                    );
+                };
+
+            script.src =
+                GAS_URL +
+                "?action=readLines" +
+                "&appendixType=" +
+                encodeURIComponent(
+                    appendixType
+                ) +
+                "&token=" +
+                encodeURIComponent(
+                    getAuthToken()
+                ) +
+                "&division=" +
+                encodeURIComponent(
+                    selectedDivision
+                ) +
+                "&callback=" +
+                encodeURIComponent(
+                    callbackName
+                ) +
+                "&_=" +
+                Date.now();
+
+            script.onerror =
+                function() {
+                    if (settled) {
+                        return;
+                    }
+
+                    settled = true;
+                    clearTimeout(timeoutId);
+                    cleanup();
+                    resolve([]);
+                };
+
+            document.body.appendChild(script);
+        });
+    }
+
+
+    async function loadOverviewLineMapAllAppendices(
+        appendixTypes
+    ) {
+
+        const divisionId =
+            divisionSelect.value;
+
+        if (
+            !divisionId ||
+            !divisions[divisionId]
+        ) {
+            overviewLineMapStatus.textContent =
+                "請先選擇河川分署";
+            return;
+        }
+
+        initializeOverviewLineMap();
+
+        const selectedDivision =
+            divisions[divisionId].name;
+
+        overviewLineMapStatus.textContent =
+            selectedDivision +
+            "全部附表工程線形載入中...";
+
+        if (overviewLineGroup) {
+            overviewLineGroup.clearLayers();
+        }
+
+        try {
+            const groups =
+                await Promise.all(
+                    appendixTypes.map(function(appendixType) {
+                        return readOverviewLinesForAllView(
+                            appendixType,
+                            selectedDivision
+                        );
+                    })
+                );
+
+            if (!isAllBusinessAppendicesMode()) {
+                return;
+            }
+
+            const merged = [];
+
+            groups.forEach(function(records) {
+                records.forEach(function(record) {
+                    merged.push(record);
+                });
+            });
+
+            handleOverviewLineData({
+                success: true,
+                data: merged
+            });
+
+        } catch (error) {
+            overviewLineMapStatus.textContent =
+                "全部附表工程位置總覽讀取失敗。";
+        }
+    }
+
+
     function loadOverviewLineMap() {
+
+        if (isAllBusinessAppendicesMode()) {
+            loadOverviewLineMapAllAppendices(
+                getBusinessAppendixTypesForCurrentDivision()
+            );
+            return;
+        }
 
         const divisionId =
             divisionSelect.value;
@@ -5475,9 +8809,22 @@
             getCurrentBusinessAppendixType();
 
 
+        const overviewAppendixLabelMap = {
+            appendix1: "附表1",
+            appendix2: "附表2",
+            appendix3: "附表3",
+            appendix4: "附表4",
+            appendix5: "附表5",
+            appendix6: "附表6"
+        };
+
         overviewLineMapStatus.textContent =
             selectedDivision +
-            (selectedAppendixType === "appendix2" ? "附表2" : "附表1") +
+            (
+                overviewAppendixLabelMap[
+                    selectedAppendixType
+                ] || "附表1"
+            ) +
             "工程線形載入中...";
 
 
@@ -5603,9 +8950,39 @@
         overviewLineGroup.clearLayers();
 
 
-        const records =
+        const rawRecords =
             Array.isArray(response.data) ?
             response.data : [];
+
+        // 提報工程位置必須跟目前「查看附表」一致：
+        // - 單一附表：只顯示該附表的工程線形。
+        // - 全部附表：才顯示本分署所有適用附表的工程線形。
+        const currentAppendixType =
+            getCurrentBusinessAppendixType();
+
+        const allowedAppendixTypes =
+            currentAppendixType === "all"
+                ? getBusinessAppendixTypesForCurrentDivision()
+                : [currentAppendixType];
+
+        const records =
+            rawRecords.filter(function(record) {
+
+                if (!record) {
+                    return false;
+                }
+
+                // 舊的線形資料若沒有附表類型，視為附表1。
+                const recordAppendixType =
+                    record.appendixType ||
+                    "appendix1";
+
+                return (
+                    allowedAppendixTypes.indexOf(
+                        recordAppendixType
+                    ) !== -1
+                );
+            });
 
 
         let caseCount = 0;
@@ -5685,15 +9062,49 @@
                     caseCount++;
 
 
-                    const locationMeta =
-                        record.appendixType === "appendix2"
-                            ? record.drainageName
-                            : [
-                                record.riverSystem,
-                                record.creek
-                              ]
-                              .filter(Boolean)
-                              .join("｜");
+                    let locationMeta = "";
+
+                    if (
+                        record.appendixType ===
+                        "appendix2"
+                    ) {
+
+                        locationMeta =
+                            record.drainageName || "";
+
+                    } else if (
+                        record.appendixType ===
+                        "appendix3"
+                    ) {
+
+                        locationMeta =
+                            record.coastName || "";
+
+                    } else if (
+                        record.appendixType ===
+                            "appendix4" ||
+                        record.appendixType ===
+                            "appendix5" ||
+                        record.appendixType ===
+                            "appendix6"
+                    ) {
+
+                        locationMeta = [
+                            record.flowCategory,
+                            record.waterbodyName
+                        ]
+                        .filter(Boolean)
+                        .join("｜");
+
+                    } else {
+
+                        locationMeta = [
+                            record.riverSystem,
+                            record.creek
+                        ]
+                        .filter(Boolean)
+                        .join("｜");
+                    }
 
                     const popupHtml =
                         '<div class="overview-line-popup-title">' +
@@ -5758,16 +9169,36 @@
         }, 80);
 
 
+        const currentAppendixTypeForStatus =
+            getCurrentBusinessAppendixType();
+
+        const overviewAppendixStatusLabelMap = {
+            appendix1: "附表1",
+            appendix2: "附表2",
+            appendix3: "附表3",
+            appendix4: "附表4",
+            appendix5: "附表5",
+            appendix6: "附表6",
+            all: "全部附表"
+        };
+
+        const currentOverviewLabel =
+            overviewAppendixStatusLabelMap[
+                currentAppendixTypeForStatus
+            ] || "目前附表";
+
         if (caseCount === 0) {
 
             overviewLineMapStatus.textContent =
-                "目前所選分署尚無工程線形資料";
+                currentOverviewLabel +
+                "目前尚無工程線形資料";
 
             return;
         }
 
 
         overviewLineMapStatus.textContent =
+            currentOverviewLabel +
             "已顯示 " +
             caseCount +
             " 件工程、共 " +
@@ -5827,50 +9258,102 @@
     }
 
 
-    function openViewLineMap(caseData) {
+function openViewLineMap(
+    caseData
+) {
 
-        initializeViewLineMap();
+    initializeViewLineMap();
 
-        viewLineTitle.textContent =
-            (caseData.caseName || "未命名案件") +
-            "－工程線形";
+    viewLineTitle.textContent =
+        (
+            caseData.caseName ||
+            "未命名案件"
+        ) +
+        "－工程線形";
 
-        viewLineInfo.textContent = [
-                caseData.division,
-                caseData.county,
-                caseData.township,
-                caseData.appendixType === "appendix2"
-                    ? caseData.drainageName
-                    : caseData.riverSystem,
-                caseData.appendixType === "appendix2"
-                    ? ""
-                    : caseData.creek
-            ]
-            .filter(function(value) {
-                return value;
-            })
-            .join("｜");
+    let locationParts = [
+        caseData.division,
+        caseData.county,
+        caseData.township
+    ];
 
-        viewLineStatus.textContent =
-            "線形資料載入中...";
+    if (
+        caseData.appendixType ===
+        "appendix2"
+    ) {
 
-        // 先移除上一個案件的線形，避免載入失敗時仍看到舊線
-        if (viewLineLayer) {
-
-            viewLineMap.removeLayer(
-                viewLineLayer
-            );
-
-            viewLineLayer = null;
-        }
-
-        viewLineModal.classList.add(
-            "show"
+        locationParts.push(
+            caseData.drainageName
         );
 
-        setTimeout(function() {
+    } else if (
+        caseData.appendixType ===
+        "appendix3"
+    ) {
 
-            viewLineMap.invalidateSize();
+        locationParts.push(
+            caseData.coastName
+        );
+
+    } else if (
+        caseData.appendixType ===
+            "appendix4" ||
+        caseData.appendixType ===
+            "appendix5" ||
+        caseData.appendixType ===
+            "appendix6"
+    ) {
+
+        locationParts.push(
+            caseData.flowCategory
+        );
+
+        locationParts.push(
+            caseData.waterbodyName
+        );
+
+    } else {
+
+        locationParts.push(
+            caseData.riverSystem
+        );
+
+        locationParts.push(
+            caseData.creek
+        );
+    }
+
+    viewLineInfo.textContent =
+        locationParts
+            .filter(
+                function(value) {
+                    return value;
+                }
+            )
+            .join("｜");
+
+    viewLineStatus.textContent =
+        "線形資料載入中...";
+
+    // 先移除上一個案件的線形，避免載入失敗時仍看到舊線。
+    if (viewLineLayer) {
+
+        viewLineMap.removeLayer(
+            viewLineLayer
+        );
+
+        viewLineLayer = null;
+    }
+
+    viewLineModal.classList.add(
+        "show"
+    );
+
+    setTimeout(
+        function() {
+
+            viewLineMap
+                .invalidateSize();
 
             const divisionId =
                 getDivisionIdByName(
@@ -5879,108 +9362,129 @@
 
             if (
                 divisionId &&
-                divisions[divisionId]
+                divisions[
+                    divisionId
+                ]
             ) {
 
                 viewLineMap.setView(
                     [
-                        divisions[divisionId].lat,
-                        divisions[divisionId].lng
+                        divisions[
+                            divisionId
+                        ].lat,
+                        divisions[
+                            divisionId
+                        ].lng
                     ],
-                    divisions[divisionId].zoom || 9
+                    divisions[
+                        divisionId
+                    ].zoom || 9
                 );
 
             } else {
 
                 viewLineMap.setView(
-                    [23.7, 120.9],
+                    [
+                        23.7,
+                        120.9
+                    ],
                     7
                 );
-
             }
 
-        }, 120);
+        },
+        120
+    );
 
-
-        const oldScript =
-            document.getElementById(
-                "viewLineJsonp"
-            );
-
-        if (oldScript) {
-            oldScript.remove();
-        }
-
-
-        const script =
-            document.createElement(
-                "script"
-            );
-
-        script.id =
-            "viewLineJsonp";
-
-        script.src =
-            GAS_URL +
-            "?action=readLine" +
-            "&appendixType=" +
-            encodeURIComponent(
-                caseData.appendixType || "appendix1"
-            ) +
-            "&token=" +
-            encodeURIComponent(
-                getAuthToken()
-            ) +
-            "&caseId=" +
-            encodeURIComponent(
-                caseData.caseId || ""
-            ) +
-            "&division=" +
-            encodeURIComponent(
-                caseData.division || ""
-            ) +
-            "&county=" +
-            encodeURIComponent(
-                caseData.county || ""
-            ) +
-            "&township=" +
-            encodeURIComponent(
-                caseData.township || ""
-            ) +
-            "&riverSystem=" +
-            encodeURIComponent(
-                caseData.riverSystem || ""
-            ) +
-            "&creek=" +
-            encodeURIComponent(
-                caseData.creek || ""
-            ) +
-            "&drainageName=" +
-            encodeURIComponent(
-                caseData.drainageName || ""
-            ) +
-            "&caseName=" +
-            encodeURIComponent(
-                caseData.caseName || ""
-            ) +
-            "&callback=handleViewLineData" +
-            "&_=" +
-            Date.now();
-
-        script.onerror =
-            function() {
-
-                viewLineStatus.textContent =
-                    "線形資料讀取失敗，請確認網路。";
-
-            };
-
-        document.body.appendChild(
-            script
+    const oldScript =
+        document.getElementById(
+            "viewLineJsonp"
         );
 
+    if (oldScript) {
+        oldScript.remove();
     }
 
+    const script =
+        document.createElement(
+            "script"
+        );
+
+    script.id =
+        "viewLineJsonp";
+
+    script.src =
+        GAS_URL +
+        "?action=readLine" +
+        "&appendixType=" +
+        encodeURIComponent(
+            caseData.appendixType ||
+            "appendix1"
+        ) +
+        "&token=" +
+        encodeURIComponent(
+            getAuthToken()
+        ) +
+        "&caseId=" +
+        encodeURIComponent(
+            caseData.caseId || ""
+        ) +
+        "&division=" +
+        encodeURIComponent(
+            caseData.division || ""
+        ) +
+        "&county=" +
+        encodeURIComponent(
+            caseData.county || ""
+        ) +
+        "&township=" +
+        encodeURIComponent(
+            caseData.township || ""
+        ) +
+        "&riverSystem=" +
+        encodeURIComponent(
+            caseData.riverSystem || ""
+        ) +
+        "&creek=" +
+        encodeURIComponent(
+            caseData.creek || ""
+        ) +
+        "&drainageName=" +
+        encodeURIComponent(
+            caseData.drainageName || ""
+        ) +
+        "&coastName=" +
+        encodeURIComponent(
+            caseData.coastName || ""
+        ) +
+        "&flowCategory=" +
+        encodeURIComponent(
+            caseData.flowCategory || ""
+        ) +
+        "&waterbodyName=" +
+        encodeURIComponent(
+            caseData.waterbodyName || ""
+        ) +
+        "&caseName=" +
+        encodeURIComponent(
+            caseData.caseName || ""
+        ) +
+        "&callback=handleViewLineData" +
+        "&_=" +
+        Date.now();
+
+    script.onerror =
+        function() {
+
+            viewLineStatus.textContent =
+                "線形資料讀取失敗，請確認網路。";
+
+        };
+
+    document.body.appendChild(
+        script
+    );
+}
 
     function handleViewLineData(response) {
         if (
@@ -6095,7 +9599,178 @@
         );
 
 
-    refreshDataButton.addEventListener("click", loadBusinessData);
+    function base64ToDownloadBlob(base64, mimeType) {
+        const byteCharacters = atob(base64);
+        const sliceSize = 1024;
+        const byteArrays = [];
+
+        for (
+            let offset = 0;
+            offset < byteCharacters.length;
+            offset += sliceSize
+        ) {
+            const slice = byteCharacters.slice(
+                offset,
+                offset + sliceSize
+            );
+            const byteNumbers = new Array(slice.length);
+
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+
+            byteArrays.push(new Uint8Array(byteNumbers));
+        }
+
+        return new Blob(byteArrays, {
+            type:
+                mimeType ||
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+    }
+
+
+    function resetMeetingExcelExportUi() {
+        if (meetingExcelExportTimer) {
+            clearTimeout(meetingExcelExportTimer);
+            meetingExcelExportTimer = null;
+        }
+
+        if (meetingExcelExportButton) {
+            meetingExcelExportButton.disabled = false;
+        }
+
+        const oldScript = document.getElementById(
+            "meetingExcelExportJsonp"
+        );
+
+        if (oldScript) {
+            oldScript.remove();
+        }
+    }
+
+
+    function exportMeetingExcel() {
+        if (currentAuthRole !== "admin") {
+            alert("此功能僅限管理模式使用。");
+            return;
+        }
+
+        const token = getAuthToken();
+
+        if (!token) {
+            showLoginGate("登入已失效，請重新登入。");
+            return;
+        }
+
+        resetMeetingExcelExportUi();
+        meetingExcelExportButton.disabled = true;
+        meetingExcelExportStatus.textContent =
+            "Excel 產製中，請稍候…";
+
+        const script = document.createElement("script");
+        script.id = "meetingExcelExportJsonp";
+        script.src =
+            GAS_URL +
+            "?action=exportMeetingExcel" +
+            "&token=" +
+            encodeURIComponent(token) +
+            "&callback=handleMeetingExcelExport" +
+            "&_=" +
+            Date.now();
+
+        script.onerror = function() {
+            resetMeetingExcelExportUi();
+            meetingExcelExportStatus.textContent =
+                "Excel 產製失敗，請確認 Apps Script 部署版本。";
+        };
+
+        document.body.appendChild(script);
+
+        meetingExcelExportTimer = setTimeout(function() {
+            resetMeetingExcelExportUi();
+            meetingExcelExportStatus.textContent =
+                "Excel 產製逾時，請稍後再試。";
+        }, 120000);
+    }
+
+
+    function handleMeetingExcelExport(response) {
+        resetMeetingExcelExportUi();
+
+        if (handleAuthFailure(response)) {
+            return;
+        }
+
+        if (
+            !response ||
+            response.success !== true ||
+            !response.base64 ||
+            !response.fileName
+        ) {
+            meetingExcelExportStatus.textContent =
+                response && response.message
+                    ? response.message
+                    : "Excel 產製失敗。";
+            return;
+        }
+
+        try {
+            const blob = base64ToDownloadBlob(
+                response.base64,
+                response.mimeType
+            );
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download = response.fileName;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            setTimeout(function() {
+                URL.revokeObjectURL(url);
+            }, 1000);
+
+            const summary = Array.isArray(response.summary)
+                ? response.summary
+                : [];
+
+            const totalCount = summary.reduce(
+                function(total, item) {
+                    return (
+                        total +
+                        Number(item.recordCount || 0)
+                    );
+                },
+                0
+            );
+
+            meetingExcelExportStatus.textContent =
+                "已產製並下載 Excel，共匯入 " +
+                totalCount +
+                " 筆案件；私人雲端亦保留備份。";
+
+        } catch (error) {
+            meetingExcelExportStatus.textContent =
+                "Excel 已產製，但瀏覽器下載失敗：" +
+                error.message;
+        }
+    }
+
+
+    refreshDataButton.addEventListener(
+        "click",
+        loadBusinessData
+    );
+
+    if (meetingExcelExportButton) {
+        meetingExcelExportButton.addEventListener(
+            "click",
+            exportMeetingExcel
+        );
+    }
 
     syncDivisionToForm();
 
@@ -6374,7 +10049,6 @@
 
         "蘭陽溪水系": [
             "蘭陽溪",
-            "安農溪",
             "羅東溪",
             "宜蘭河",
             "大礁溪",
@@ -6647,6 +10321,23 @@
         "change",
         function() {
 
+            const restricted =
+                updateRegionalDrainageRestrictions();
+
+            // 若管理模式原本停在附表2，再切到沒有區排的分署，
+            // 自動回到附表1並清空表單，避免附表2資料誤送。
+            if (
+                restricted &&
+                appendixTypeSelect.value ===
+                    "appendix2"
+            ) {
+
+                appendixTypeSelect.value =
+                    "appendix1";
+
+                resetCaseFormForCreate();
+            }
+
             // 更新縣市
             updateCountyOptions(
                 this.value
@@ -6662,6 +10353,9 @@
             updateDrainageOptions(
                 this.value
             );
+
+            // 附表4～6：依分署與流域別更新名稱建議
+            updateWaterbodySuggestions();
 
             const businessDataPage =
                 document.getElementById(
@@ -6683,6 +10377,19 @@
 
         }
     );
+
+
+    if (flowCategoryInput) {
+        flowCategoryInput.addEventListener(
+            "change",
+            function() {
+                if (waterbodyNameInput) {
+                    waterbodyNameInput.value = "";
+                }
+                updateWaterbodySuggestions();
+            }
+        );
+    }
 
 
     // 水系改變
@@ -7263,6 +10970,336 @@
         });
     }
 
+
+    /**
+     * 附表1～附表6共用的「完整提報案件」判斷。
+     *
+     * 各附表：
+     * - 「其他」可空白。
+     * - 「預估用地取得經費」僅類別為「用地先期」時必填。
+     * - 河海組初擬意見／結論、備註、系統案件ID不列入判斷。
+     */
+    function getValidRowsForAppendix(
+        rows,
+        appendixType
+    ) {
+
+        if (
+            !Array.isArray(
+                rows
+            )
+        ) {
+            return [];
+        }
+
+        const config =
+            getAppendixClientConfig(
+                appendixType
+            );
+
+        return rows.filter(
+            function(row) {
+
+                if (
+                    !Array.isArray(
+                        row
+                    )
+                ) {
+                    return false;
+                }
+
+                for (
+                    let i = 1;
+                    i <=
+                    config.editableEndIndex;
+                    i++
+                ) {
+
+                    // 「其他」可空白。
+                    if (
+                        i ===
+                        config.optionalOtherIndex
+                    ) {
+                        continue;
+                    }
+
+                    // 預估用地取得經費另做條件式判斷。
+                    if (
+                        i ===
+                        config.conditionalLandCostIndex
+                    ) {
+                        continue;
+                    }
+
+                    const value =
+                        row[i];
+
+                    if (
+                        value ===
+                            undefined ||
+                        value ===
+                            null ||
+                        String(
+                            value
+                        ).trim() ===
+                            ""
+                    ) {
+                        return false;
+                    }
+                }
+
+                const category =
+                    String(
+                        row[1] || ""
+                    ).trim();
+
+                if (
+                    category ===
+                    "用地先期"
+                ) {
+
+                    const landCost =
+                        row[
+                            config
+                                .conditionalLandCostIndex
+                        ];
+
+                    if (
+                        landCost ===
+                            undefined ||
+                        landCost ===
+                            null ||
+                        String(
+                            landCost
+                        ).trim() ===
+                            ""
+                    ) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        );
+    }
+
+
+    /**
+     * 附表1～附表6共用儀表板。
+     * 年度欄位依使用者提供的 Excel 顯示為 115／116／117 年。
+     */
+    function renderGenericAppendixDashboard(
+        rows,
+        containerId,
+        appendixType
+    ) {
+
+        const container =
+            document.getElementById(
+                containerId
+            );
+
+        if (!container) {
+            return;
+        }
+
+        const config =
+            getAppendixClientConfig(
+                appendixType
+            );
+
+        const validRows =
+            getValidRowsForAppendix(
+                rows,
+                appendixType
+            );
+
+        const caseCount =
+            validRows.length;
+
+        const totalFunding =
+            validRows.reduce(
+                function(
+                    sum,
+                    row
+                ) {
+                    return (
+                        sum +
+                        parseSheetNumber(
+                            row[
+                                config
+                                    .totalFundingIndex
+                            ]
+                        )
+                    );
+                },
+                0
+            );
+
+        const budgetA =
+            validRows.reduce(
+                function(
+                    sum,
+                    row
+                ) {
+                    return (
+                        sum +
+                        parseSheetNumber(
+                            row[
+                                config
+                                    .budgetAIndex
+                            ]
+                        )
+                    );
+                },
+                0
+            );
+
+        const categoryDistribution = {
+            "工程": 0,
+            "用地先期": 0,
+            "用地取得": 0,
+            "委託測設監造": 0,
+            "橋梁改建": 0
+        };
+
+        validRows.forEach(
+            function(row) {
+
+                const category =
+                    String(
+                        row[1] || ""
+                    ).trim();
+
+                if (
+                    Object
+                        .prototype
+                        .hasOwnProperty
+                        .call(
+                            categoryDistribution,
+                            category
+                        )
+                ) {
+                    categoryDistribution[
+                        category
+                    ]++;
+                }
+            }
+        );
+
+        let locationIndex = 5;
+        let locationTitle =
+            "水系分布";
+
+        if (
+            appendixType ===
+            "appendix2"
+        ) {
+
+            locationTitle =
+                "排水名稱分布";
+
+        } else if (
+            appendixType ===
+            "appendix3"
+        ) {
+
+            locationTitle =
+                "海岸名稱分布";
+
+        } else if (
+            appendixType ===
+                "appendix4" ||
+            appendixType ===
+                "appendix5" ||
+            appendixType ===
+                "appendix6"
+        ) {
+
+            locationIndex = 6;
+            locationTitle =
+                "溪別、區排或海岸名稱分布";
+        }
+
+        const locationDistribution =
+            countByColumn(
+                validRows,
+                locationIndex
+            );
+
+        const countyDistribution =
+            countByColumn(
+                validRows,
+                3
+            );
+
+        container.innerHTML = `
+            <div class="dashboard-cards">
+
+                <div class="dashboard-card">
+                    <div class="dashboard-card-label">
+                        提報案件
+                    </div>
+                    <div class="dashboard-card-value">
+                        ${caseCount}
+                        <span class="dashboard-card-unit">
+                            件
+                        </span>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="dashboard-card-label">
+                        經費需求合計
+                    </div>
+                    <div class="dashboard-card-value">
+                        ${formatDashboardNumber(totalFunding)}
+                        <span class="dashboard-card-unit">
+                            千元
+                        </span>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="dashboard-card-label">
+                        115年度預估使用經費
+                    </div>
+                    <div class="dashboard-card-value">
+                        ${formatDashboardNumber(budgetA)}
+                        <span class="dashboard-card-unit">
+                            千元
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="dashboard-breakdowns">
+                ${
+                    createDashboardBars(
+                        categoryDistribution,
+                        "案件類別分布"
+                    )
+                }
+
+                ${
+                    createDashboardBars(
+                        locationDistribution,
+                        locationTitle
+                    )
+                }
+
+                ${
+                    createDashboardBars(
+                        countyDistribution,
+                        "縣市分布"
+                    )
+                }
+            </div>
+        `;
+    }
+
+
     function countByColumn(
         rows,
         columnIndex
@@ -7590,7 +11627,7 @@
             <div class="dashboard-card">
 
                 <div class="dashboard-card-label">
-                    116年度預估使用經費
+                    115年度預估使用經費
                 </div>
 
                 <div class="dashboard-card-value">
@@ -7756,7 +11793,7 @@
 
             <div class="dashboard-card">
                 <div class="dashboard-card-label">
-                    116年度預估使用經費
+                    115年度預估使用經費
                 </div>
                 <div class="dashboard-card-value">
                     ${formatDashboardNumber(budget116)}
